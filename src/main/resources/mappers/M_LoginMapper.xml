@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+ <mapper namespace="com.teamsalad.mapper.M_LoginMapper"> 
+ 
+ 	<!-- 일반 로그인 -->
+	<select id="memberLogin" resultType="memberVO">
+		select * 
+		from tbl_member
+		where m_id = #{m_id} and m_pw = #{m_pw}
+	</select>
+	
+	<!-- 구글 로그인 결과 값  -->
+	<select id="googleLogin" resultType="memberVO">
+		select * 
+		from tbl_member
+		where m_id = #{m_id} and m_email = #{m_email}
+	</select>
+	
+	<!-- 구글 회원가입  -->
+	<insert id="googleJoin">
+		insert into tbl_member(m_id, m_pw, m_name, m_email) 
+		values (#{m_id}, #{m_pw}, #{m_name}, #{m_email})
+	</insert>
+	
+	<!-- 아이디 비밀번호 찾기  -->
+	
+	<!-- 비밀번호 변경 -->
+	<update id="updatePw" >
+		update tbl_member set m_pw = #{m_pw} where m_id = #{m_id}
+	</update>
+	
+	<!-- 회원정보 가져오기  -->
+ 	<select id="readMember" resultType="memberVO">
+		select *
+		from tbl_member 
+		where m_id = #{m_id}
+	</select>
+
+    
+ </mapper>

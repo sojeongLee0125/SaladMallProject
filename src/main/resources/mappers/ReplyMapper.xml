@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.teamsalad.mapper.ReplyMapper">
+
+	<!-- 댓글 목록 -->
+	<select id="list" resultType="replyVO">
+		select * 
+		from tbl_reply 
+		where reply_b_main_num = #{reply_b_main_num} 
+		order by reply_b_num
+	</select>
+
+	<!-- 댓글 쓰기 -->
+	<insert id="create">
+		insert into tbl_reply (reply_m_id, reply_b_type, reply_b_main_num, reply_b_content, reply_b_ip ) 
+		values ( #{reply_m_id}, #{reply_b_type}, #{reply_b_main_num}, #{reply_b_content}, #{reply_b_ip})
+	</insert>
+	
+	<!-- 관리자 댓글시 상태 업데이트  -->	
+	<update id="adminupdate">
+		update customer_board 
+		set customer_b_status = 1 
+		where customer_b_num = #{reply_b_main_num} 
+	</update>
+
+	<!-- 댓글 수정 -->
+	<update id="update">
+		update tbl_reply 
+		set reply_b_type = #{reply_b_type}, 
+		reply_b_content = #{reply_b_content}, 
+		reply_b_date = NOW()  
+		where reply_b_num = #{reply_b_num}
+	</update>
+
+	<!-- 댓글 삭제 -->
+	<delete id="delete">
+		delete from tbl_reply 		
+		where reply_b_num = #{reply_b_num}
+	</delete>
+	
+	<!-- 댓글 페이징 -->
+	<select id="listPaging" resultType="replyVO">
+		select * 
+		from tbl_reply 
+		where reply_b_main_num = #{reply_b_main_num} 
+		order by reply_b_num 
+		limit #{criteria.skip}, #{criteria.pageAmount}
+	</select>
+
+	<select id="countReplies" resultType="int"> 
+		select count(reply_b_num) 
+		from tbl_reply 
+		where reply_b_main_num = #{reply_b_main_num} 
+	</select>
+	
+</mapper>			
+	

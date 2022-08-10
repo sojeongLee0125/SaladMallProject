@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+ <mapper namespace="com.teamsalad.mapper.PaymentMapper">
+ 	
+ 	<resultMap type="cartVO" id="cart">
+ 		<id property="cart_num" column="cart_num"/>
+ 		<id property="m_id" column="m_id"/>
+ 		<id property="rcp_num" column="rcp_num"/>
+ 		<id property="cart_amount" column="cart_amount"/>
+ 		<id property="cart_option" column="cart_option"/>
+ 		<id property="cart_price" column="cart_price"/>
+ 		<id property="cart_regdate" column="cart_regdate"/>
+ 	</resultMap>
+ 	
+ 	<resultMap type="recipeVO" id="recipe">
+ 		<id property="rcp_num" column="rcp_num"/>
+ 		<id property="rcp_name" column="rcp_name"/>
+ 		<id property="rcp_img" column="rcp_img"/>
+ 		<id property="rcp_price" column="rcp_price"/>
+ 	</resultMap>
+     
+     	<resultMap type="SaladCartVO" id="saladCart">
+     		<collection property="cart" resultMap="cart"/>
+     		<collection property="recipe" resultMap="recipe"/>
+     	</resultMap>
+ 
+	<!-- 주문 정보 입력 -->
+	<insert id="orderInfo">
+	 	insert into tbl_order(m_id, rcp_num, coupon_id, order_pay_num, rcp_name, order_name, order_date, order_receive_name,
+	                          order_receive_phone, order_receive_zip, order_receive_addr1, order_receive_addr2, order_type, order_amount, order_ship_price, order_total_price) 
+	    	values(#{m_id}, #{rcp_num}, #{coupon_id}, #{order_pay_num}, #{rcp_name}, #{order_name}, now(), #{order_receive_name},
+	               #{order_receive_phone}, #{order_receive_zip}, #{order_receive_addr1}, #{order_receive_addr2}, #{order_type}, #{order_amount}, #{order_ship_price}, #{order_total_price})
+	</insert>
+	
+	<!-- 주문 정보 조회 --> 
+	<select id="getOrderInfo" resultMap="saladCart">
+		select * from tbl_cart
+		natural join salad_recipe
+		natural join tbl_member
+		where m_id = #{m_id}
+	</select>
+	 
+	<!-- 주문 번호 조회 -->
+	<select id="getOrderPayNum" resultType="Integer">
+		select max(order_num)
+		from tbl_order;
+	</select>
+	
+	<!-- 주문 정보 삭제 --> 
+    	<delete id="cartDelete">
+    		delete from tbl_cart
+    		where cart_num = #{cart_num}
+    	</delete>
+     
+ </mapper>

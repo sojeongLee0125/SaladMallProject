@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.teamsalad.mapper.BasketMapper">
+ 
+	 <!-- 장바구니 정보 -->
+	<select id="basket" resultType="CartVO">
+		select *
+		from tbl_cart
+		where m_id = #{m_id}
+	</select>
+	 
+	 <!-- 장비구니 삭제 -->
+	<delete id="basket_delete">
+		delete from tbl_cart
+		where cart_num = #{cart_num}
+	</delete>
+  
+</mapper>

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.teamsalad.mapper.CSMapper">
+
+	<!-- 게시판 글 전체 목록 -->
+	<select id="listALL" resultType="customerBoardVO">
+		<![CDATA[
+		select 
+		*
+		from 
+		customer_board
+		where customer_b_num > 0 
+		order by customer_b_num desc
+		]]>
+	</select>
+	
+	<!-- 게시판 전체 목록 페이징 처리 list -->
+	<select id="listCri" resultType="customerBoardVO">
+	   select * 
+	   from customer_board 
+	   order by customer_b_num desc
+	   limit #{skip},#{pageAmount}	  
+	</select>
+	
+	<!-- 게시판 글 갯수 계산  -->
+	<select id="countCSBoard" resultType="int">
+	   select count(*) 
+	   from customer_board
+	</select>
+
+	<!-- 게시판 글쓰기 -->
+	<insert id="create">
+		insert into customer_board 
+		(customer_b_type, customer_b_title, m_id, customer_b_content, order_num) 
+		values ( #{customer_b_type}, #{customer_b_title}, #{m_id}, #{customer_b_content}, #{order_num})
+	</insert>
+	
+	<!-- 게시판 글쓰기 해당 회원 주문정보 조회 -->
+	<select id="selectOrder" resultType="orderVO">
+		select * 
+		from tbl_order 
+		where m_id = #{m_id}
+	</select>
+
+	<!--게시판 글 조회(특정글) -->
+	<select id="read" resultType="customerBoardVO">
+		select
+		*
+		from
+		customer_board
+		where
+		customer_b_num = #{customer_b_num}
+	</select>
+	
+	<!-- 댓글 정보 가져오기 -->
+	<select id="getReply" resultType="replyVO">
+		select * from tbl_reply 
+        	where
+        	reply_b_main_num = #{reply_b_main_num} and reply_m_id={reply_m_id}			
+	</select>
+
+	<!-- 게시판 특정글 수정 -->
+	<update id="modify">
+		update customer_board 
+		set customer_b_type = #{customer_b_type}, 
+		order_num = #{order_num},  
+		customer_b_title = #{customer_b_title}, 
+		customer_b_content = #{customer_b_content}, 
+		customer_b_file = #{customer_b_file} 
+		where customer_b_num = #{customer_b_num}
+	</update>
+
+	<!-- 게시판 글 삭제 -->
+	<delete id="delete">
+		delete from customer_board
+		where customer_b_num = #{customer_b_num}
+	</delete>
+
+	
+
+</mapper>				

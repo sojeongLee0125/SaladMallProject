@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+ <mapper namespace="com.teamsalad.mapper.R_BoardMapper">
+     <resultMap type="memberVO" id="member">
+     	<id property="m_id" column="m_id"/>
+     	<id property="m_name" column="m_name"/>
+     	<id property="m_email" column="m_email"/>
+     	<id property="m_grade" column="m_grade"/>
+     	<id property="m_regdate" column="m_regdate"/>
+     </resultMap>
+     
+     <resultMap type="recipeBoardVO" id="board">
+     	<id property="rcp_b_num" column="rcp_b_num"/>
+     	<id property="m_id" column="m_id"/>
+     	<id property="rcp_num" column="rcp_num"/>
+     	<id property="rcp_b_date" column="rcp_b_date"/>
+     	<id property="rcp_b_title" column="rcp_b_title"/>
+     	<id property="rcp_b_content" column="rcp_b_content"/>
+     	<id property="rcp_b_thumbnail" column="rcp_b_thumbnail"/>
+     	<id property="rcp_b_img1" column="rcp_b_img1"/>
+     	<id property="rcp_b_img2" column="rcp_b_img2"/>
+     	<id property="rcp_b_img3" column="rcp_b_img3"/>
+     	<id property="rcp_b_like_count" column="rcp_b_like_count"/>
+     </resultMap>
+     
+     <resultMap type="recipeVO" id="recipe">
+     	<id property="rcp_num" column="rcp_num"/>
+     	<id property="rcp_cmbnt" column="rcp_cmbnt"/>
+     	<id property="rcp_name" column="rcp_name"/>
+     	<id property="rcp_img" column="rcp_img"/>
+     	<id property="rcp_price" column="rcp_price"/>
+     	<id property="rcp_week_count" column="rcp_week_count"/>
+     </resultMap>
+     
+     <resultMap type="BoardMemberVO" id="boardmember">
+     	<collection property="member" resultMap="member"/>
+     	<collection property="board" resultMap="board"/>
+     	<collection property="recipe" resultMap="recipe"/>
+     </resultMap>
+     
+     <!--      필요 테이블 선택 가능 -->
+     <resultMap type="Object" id="selectClass">
+	<discriminator javaType="String" column="table_name">
+	 <case value="customer_board" resultType="customerBoardVO"/>
+	 <case value="recipe_board" resultType="recipeBoardVO"/>
+	 <case value="review_board" resultType="reviewBoardVO"/>
+	 <case value="salad_ingredient" resultType="ingredientVO"/>
+	 <case value="salad_recipe" resultType="recipeVO"/>
+	</discriminator>
+     </resultMap>
+	 
+     <resultMap type="recipeBoardVO" id="searchRecipeBoard">
+     	<id property="rcp_b_num" column="num"/>
+     	<id property="rcp_b_title" column="title"/>
+     </resultMap>
+     
+     <!-- 레시피 게시판 입력-->
+     <insert id="R_Board_regist">
+     	insert into recipe_board (m_id, rcp_num, rcp_b_title, rcp_b_content, rcp_b_thumbnail, rcp_b_img1, rcp_b_img2, rcp_b_img3)
+     	values (#{m_id}, #{rcp_num}, #{rcp_b_title}, #{rcp_b_content}, #{rcp_b_thumbnail}, #{rcp_b_img1}, #{rcp_b_img2}, #{rcp_b_img3})
+     </insert>
+     
+     <!-- 레시피 게시판 수정--> 
+     <update id="R_Board_modify">
+     	update recipe_board
+     	set rcp_b_content = #{rcp_b_content}, rcp_b_title = #{rcp_b_title}, rcp_b_thumbnail = #{rcp_b_thumbnail},
+     	    rcp_b_img1 =#{rcp_b_img1}, rcp_b_img2 = #{rcp_b_img2}, rcp_b_img3 = #{rcp_b_img3}
+     	where rcp_b_num = #{rcp_b_num}
+     </update>
+     
+     <!-- 레시피 게시판 삭제-->	 
+     <delete id="R_Board_delete">
+     	delete from recipe_board
+     	where rcp_b_num = #{rcp_b_num}
+     </delete>
+     
+     <!-- 레시피 게시판 상세 조회--> 
+     <select id="R_Board_detail" resultMap="boardmember">
+     	select *
+     	from recipe_board 
+     	natural join tbl_member
+     	natural join salad_recipe
+     	where rcp_b_num = #{rcp_b_num}
+     </select>
+     
+     <!-- 레시피 조회--> 
+     <select id="R_BoardgetRecipe" resultType="recipeVO">
+     	select *
+     	from salad_recipe
+     	where rcp_num=#{rcp_num}
+     </select>
+     
+     <!-- 레시피 게시판 페이징 처리-->
+     <select id="R_Board_listPage" resultMap="boardmember">
+     	select *
+     	from recipe_board
+     	natural join tbl_member
+     	natural join salad_recipe
+     	limit #{page}, #{total}
+     </select>
+     
+     <!-- 레시피 게시판 재료 이름 조회--> 	 
+     <select id="R_Board_getIgdtName" resultType="String">
+     	select igdt_name
+	from salad_ingredient
+	where igdt_num = #{igdt_num};
+     </select>
+     
+     <!-- 레시피 게시판 글 수 조회-->
+     <select id="countBoards" resultType="int">
+	   select count(*) 
+	   from recipe_board
+     </select>
+     
+     <!-- 레시피 게시판 페이징 조회-->
+     <select id="bListCri" resultMap="boardmember">
+	   select * 
+	   from recipe_board
+	   natural join tbl_member
+           natural join salad_recipe
+	   limit #{skip},#{pageAmount}	  
+    </select>
+     
+    <!-- 레시피 게시판 주간 인기 조회-->	 
+    <select id="R_Board_weeklyPopular" resultMap="boardmember">
+     	select *
+     	from recipe_board
+     	natural join salad_recipe
+     	order by rcp_week_count
+     	limit 0,3
+     </select>
+     
+     <!-- 레시피 게시판 검색결과 --> 	 
+     <select id="R_Board_listTotal" resultMap="boardmember">
+     	select *
+     	from recipe_board
+     	natural join tbl_member
+     	natural join salad_recipe
+     </select>
+	 
+     <!-- 레시피 게시판 좋아요 조회-->
+     <select id="R_Board_likeCheck" resultType="int">
+     	select count(*)
+     	from rcp_b_like
+     	where rcp_b_num = #{rcp_b_num} and m_id = #{m_id}
+     </select>
+     
+     <!-- 레시피 게시판 좋아요 업데이트--> 
+     <update id="R_Board_likeUpdate">
+     	update recipe_board
+     	set rcp_b_like_count = rcp_b_like_count + 1
+     	where rcp_b_num = #{rcp_b_num}
+     </update>
+     
+     <!-- 레시피 게시판 좋아요 입력-->	 
+     <insert id="R_Board_likeInsert" >
+     	insert into rcp_b_like (rcp_b_num, m_id)
+     	values (#{rcp_b_num}, #{m_id}) 
+     </insert>
+     
+     <!-- 레시피 게시판 좋아요 삭제-->	 
+     <delete id="R_Board_likeDelete">
+     	delete from rcp_b_like
+     	where rcp_b_num = #{rcp_b_num} and m_id=#{m_id}
+     </delete>
+     
+     <!-- 레시피 게시판 좋아요 감소-->  	 
+     <update id="R_Board_likeDiscount">
+     	update recipe_board
+     	set rcp_b_like_count = rcp_b_like_count - 1
+     	where rcp_b_num = #{rcp_b_num}
+     </update>
+     
+     <!-- 레시피 게시판 댓글 리스트-->	 
+     <select id="R_Board_listReply" resultType="replyVO">
+     	select * 
+     	from tbl_reply
+     	where reply_b_type = #{reply_b_type}
+     	and reply_b_main_num = #{reply_b_main_num}
+     </select>
+     
+     <!-- 레시피 게시판 댓글 조회 -->	 
+     <select id="R_Board_reply" resultType="replyVO">
+     	select *
+     	from tbl_reply
+     	where rcp_b_num = #{rcp_b_num}
+     </select>
+     
+     <!-- 레시피 게시판 댓글 입력 --> 
+     <insert id="R_Board_addReply">
+     	insert into tbl_reply
+     	values (m_id=#{m_id}, reply_b_type=#{reply_b_type}, 
+     	reply_b_main_num=#{reply_b_main_num}, 
+     	reply_b_content=#{reply_b_content}, reply_b_ip=#{reply_b_ip})
+     </insert>
+     
+     <!-- 레시피 게시판 댓글 삭제-->	 
+     <delete id="R_Board_deleteReply">
+     	delete from tbl_reply
+     	where reply_b_num = #{reply_b_num}
+     </delete>
+     
+     <!-- 레시피 게시판 댓글 수정-->	 
+     <update id="R_Board_modifyReply">
+     	update tbl_reply
+     	set reply_b_content = #{reply_b_content}
+     	where reply_b_num = #{reply_b_num}
+     </update>
+     
+     <!-- 디비 컬럼 조회-->	 
+     <select id="R_Board_getDBColumn" resultType="String">
+     	SELECT column_name as 'columns' FROM information_schema.columns
+		WHERE table_name='recipe_board'
+     </select>
+	 
+     <!-- 레시피 게시판 서치 데이터 글 번호 조회 -->
+     <select id="R_Board_searchData" resultType="int">
+     	select rcp_b_num
+     	from recipe_board
+     	where ${column} like #{data}
+     </select>
+	 
+     <!-- 레시피 게시판 서치 데이터 정보 조회 -->
+     <select id="R_Board_searchNum" resultType="recipeBoardVO">
+     	select *
+     	from recipe_board
+     	where rcp_b_num in 
+     	<foreach collection="rcp_b_nums" item="num" index="index" open="(" separator="," close=")"  >
+     		#{num}
+     	</foreach>
+     </select>
+     
+     <!-- 필요 테이블 검색 기능 -->
+     <select id="Total_getPrimaryKeyName" resultType="String">
+	    SELECT COLUMN_NAME
+	    FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+	    WHERE TABLE_NAME = #{table_name}
+	    AND CONSTRAINT_NAME = 'PRIMARY'
+     </select>
+     
+     <!-- 컬럼 이름 조회 -->
+     <select id="Total_getDBColumn" resultType="String">
+     	SELECT column_name as 'columns' FROM information_schema.columns
+	WHERE table_name=#{table_name}
+     </select>
+	 
+     <!-- 프라이머리 키 조회-->
+     <select id="Total_searchPrimaryKey" resultType="int">
+     	select ${primary_key}
+     	from ${table_name}
+     	where ${column} like #{data}
+     </select>
+     
+     <!--      테이블마다 이 부분만 추가하면 될듯함 -->
+     <!-- customer_board 검색 -->
+     <select id="Total_searchcustomer_board" resultType="customerBoardVO">
+     	select *
+     	from ${table_name}
+     	where ${primary_key} in 
+     	<foreach collection="search_num" item="num" index="index" open="(" separator="," close=")"  >
+     		#{num}
+     	</foreach>
+     </select>
+     
+     <!--      recipe_board 검색 -->
+     <select id="Total_searchrecipe_board" resultType="recipeBoardVO">
+     	select *
+     	from ${table_name}
+     	where ${primary_key} in 
+     	<foreach collection="search_num" item="num" index="index" open="(" separator="," close=")"  >
+     		#{num}
+     	</foreach>
+     </select>
+     
+     <!--      review_board 검색 -->
+     <select id="Total_searchreview_board" resultType="reviewBoardVO">
+     	select *
+     	from ${table_name}
+     	where ${primary_key} in 
+     	<foreach collection="search_num" item="num" index="index" open="(" separator="," close=")"  >
+     		#{num}
+     	</foreach>
+     </select>
+     
+     <!--      salad_ingredient 검색 -->
+     <select id="Total_searchsalad_ingredient" resultType="ingredientVO">
+     	select *
+     	from ${table_name}
+     	where ${primary_key} in 
+     	<foreach collection="search_num" item="num" index="index" open="(" separator="," close=")"  >
+     		#{num}
+     	</foreach>
+     </select>
+     
+     <!--      salad_recipe 검색 -->
+     <select id="Total_searchsalad_recipe" resultType="recipeVO">
+     	select *
+     	from ${table_name}
+     	where ${primary_key} in 
+     	<foreach collection="search_num" item="num" index="index" open="(" separator="," close=")"  >
+     		#{num}
+     	</foreach>
+     </select>
+     
+    <!-- 회원정보 검색  -->
+     <select id="Total_searchtbl_member" resultType="memberVO">
+        select *
+        from ${table_name}
+        where ${primary_key} in 
+        <foreach collection="search_num" item="num" index="index" open="(" separator="," close=")"  >
+           #{num}
+        </foreach>
+     </select>
+     
+     <!-- 주문정보 검색  -->
+     <select id="Total_searchtbl_order" resultType="orderVO">
+        select *
+        from ${table_name}
+        where ${primary_key} in 
+        <foreach collection="search_num" item="num" index="index" open="(" separator="," close=")"  >
+           #{num}
+        </foreach>
+     </select>
+	 
+ </mapper>

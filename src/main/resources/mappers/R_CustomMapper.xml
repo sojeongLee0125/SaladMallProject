@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="com.teamsalad.mapper.R_CustomMapper">
+  
+  		<!-- 재료 목록 조회 -->
+  		<select id="listAll" resultType="ingredientVO">
+  			select *
+  			from salad_ingredient
+  			where igdt_category = #{igdt_category}
+  		</select>
+  		
+  		<!-- 커스텀 생성 -->
+  		<insert id="newcustom">
+  			insert into salad_custom(m_id, rcp_cmbnt)
+  			values (#{m_id}, null)
+  		</insert>
+  		
+  		<!-- 커스텀 체크 -->
+  		<select id="chkcustom" resultType="String">
+  			select m_id
+  			from salad_custom
+  			where m_id = #{m_id}
+  		</select>
+  		
+  		<!-- 커스텀 조합 체크 -->
+  		<select id="chkcustomcmbnt" resultType="String">
+  			select rcp_cmbnt
+  			from salad_custom
+  			where m_id = #{m_id}
+  		</select>
+  		
+  		<!-- 커스텀 받아오기 -->
+  		<select id="showcustom" resultType="String">
+  			select rcp_cmbnt
+  			from salad_custom
+  			where m_id = #{m_id}
+  		</select>
+  		
+  		<!-- 커스텀 초기화 -->
+  		<update id="resetcustom">
+  			update salad_custom set rcp_cmbnt = null
+  			where m_id = #{m_id}
+  		</update>
+  		
+  		<!-- 커스텀에 처음으로 재료 추가 -->
+  		<update id="addFirstcustom">
+  			update salad_custom
+  			set rcp_cmbnt = #{rcp_cmbnt}
+  			where m_id = #{m_id}
+  		</update>
+  		
+  		<!-- 커스텀에 재료 추가 -->
+  		<update id="addcustom">
+  			update salad_custom
+  			set rcp_cmbnt = concat(concat(rcp_cmbnt,","),#{rcp_cmbnt})
+  			where m_id = #{m_id}
+  		</update>
+  		
+  		<!-- 커스텀에 해당하는 재료 출력 -->
+  		<select id="listigdt_num" resultType="ingredientVO">
+  			select *
+  			from salad_ingredient
+  			where igdt_num in
+  				<foreach item="item" collection="igdt_numList" index="index" open="(" separator="," close=")">
+  					#{item}
+  				</foreach>
+  		</select>
+  		
+  		<!-- 커스텀 가격 합 받아오기 -->
+  		<select id="pricecustom" resultType="int">
+  			select sum(igdt_price)
+			from salad_ingredient
+			where igdt_num in
+				<foreach item="item" collection="igdt_numList" index="index" open="(" separator="," close=")">
+  					#{item}
+  				</foreach>
+  		</select>
+  		
+  		<!-- 레시피 추가 -->
+  		<insert id="addrecipe">
+  			insert into salad_recipe(rcp_cmbnt,rcp_name,rcp_content,rcp_img,rcp_price)
+  			values (#{rcp_cmbnt}, #{rcp_name}, #{rcp_content}, #{rcp_img}, #{rcp_price})
+  		</insert>
+	  
+  		<insert id="addrecipeby2">
+  			insert into salad_recipe(rcp_cmbnt,rcp_price)
+  			values (#{rcp_cmbnt},#{rcp_price})
+  		</insert>
+  		
+  		<!-- 레시피 검색 -->
+  		<select id="findrecipe" resultType="recipeVO">
+  			select *
+  			from salad_recipe
+  			where rcp_cmbnt = #{rcp_cmbnt}
+  		</select>
+  		
+  		<!-- 장바구니 중복 확인 -->
+  		<select id="chkcart" resultType="String">
+  			select cart_num
+  			from tbl_cart
+  			where rcp_num=#{rcp_num}
+  		</select>
+  		
+  		<!-- 장바구니 갯수 추가 -->
+  		<update id="updatecartamount">
+  			update tbl_cart tc INNER JOIN salad_recipe sr
+  			on tc.rcp_num = sr.rcp_num
+  			set tc.cart_amount=tc.cart_amount+1
+  			, tc.cart_price=(tc.cart_amount+1)*sr.rcp_price
+  			where tc.rcp_num=#{rcp_num}
+  		</update>
+  		
+  		<!-- 장바구니에 추가 -->
+  		<insert id="addcart">
+  			insert into tbl_cart(m_id, rcp_num, cart_price)
+  			values(#{m_id}, #{rcp_num}, #{cart_price})
+  		</insert>
+  		
+  
+  </mapper>
