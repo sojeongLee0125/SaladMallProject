@@ -21,8 +21,8 @@
 	      			value="net.sf.log4jdbc.sql.jdbcapi.DriverSpy"/>	     
 	      <property name="url" 
 	      			value="jdbc:log4jdbc:mysql://localhost:3306/itwillbs9?useSSL=false&amp;serverTimezone=Asia/Seoul"/>
-	      <property name="username" value="itwillbs9"/>
-	      <property name="password" value="itwillbs8030909"/>
+	      <property name="username" value="--"/>
+	      <property name="password" value="--"/>
 	</bean>
 	<!-- 디비 연결 정보 처리 객체(bean)  -->
 	
