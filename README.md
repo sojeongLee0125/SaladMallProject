@@ -114,23 +114,6 @@
 - 쿠폰 관리, 쿠폰 등록하기 (조건에 맞게 발급)
 - 재료정보 등록, 수정, 삭제
 
-## 📈 발표자료_PPT
-
-<details>
-<summary>발표 자료 보기</summary>
-<div markdown="1">
-1. <img src="https://user-images.githubusercontent.com/92525310/148395220-0d0876e5-a3ee-46af-894e-57432880069a.png">
-2. <img src="https://user-images.githubusercontent.com/92525310/148395267-a1520e6e-65ca-407e-9264-83e1a0896751.png">
-3. <img src="https://user-images.githubusercontent.com/92525310/148395318-ef1e4993-a630-46d3-85ef-28bd229ef341.png">
-4. <img src="https://user-images.githubusercontent.com/92525310/148395367-a8055ae9-43c9-465a-ba52-3c37b74edb5b.png">
-5. <img src="https://user-images.githubusercontent.com/92525310/148395400-9705ba11-5a6b-4565-b1eb-c395b27af26f.png">
-6. <img src="https://user-images.githubusercontent.com/92525310/148395455-b446778e-7ba0-4d8f-bdd1-ed7410d58669.png">
-7. <img src="https://user-images.githubusercontent.com/92525310/148395501-a5fa18fa-62e1-4f4d-9874-29d5e973e8fa.png">
-8. <img src="https://user-images.githubusercontent.com/92525310/148395541-2acec542-6aff-46b5-8eb4-af3e0ec40555.png">
-   <img src="https://user-images.githubusercontent.com/92525310/148395567-ca44eb0c-cf67-4fec-8f4a-7c4b1d6daefc.png">
-</div>
-</details>
-
 
 
 
