@@ -1,119 +1,110 @@
 package com.teamsalad.domain;
 
 public class PageMaker {
-	// 페이징 처리에 관련된 동작 수행
-	
-	// 현제페이지, 페이지에 출력되는 게시판 글의 개수 페이징처리
-	private Criteria cri; 
-	
-	// 페이지 하단부에 처리되는 페이징 처리
-	// 전체 게시물 수
-	private int totalCount;
-	
-	// 시작 페이지
-	private int startPage;
-	
-	// 끝페이지
-	private int endPage;
-	
-	// 이전페이지 다음페이지 존재유무
-	private boolean prev;
-	private boolean next;
-	
-	private int displayPageNum = 10; //페이지 블럭
-	
-	public void setCri(Criteria cri) {
-		  this.cri = cri;
-	}
-	
-	// 총 개수 계산
-	public void setTotalCount(int totalCount) {
-		
-		this.totalCount = totalCount;
-		
-		// 페이징에 필요한 정보처리 
-		CalcData();
-	}
-	
-	public void CalcData() {
-		System.out.println(" -----  페이징 처리에 필요한 정보 계산 -----");
-		
-		endPage = (int)Math.ceil(cri.getPageNum()/(double)displayPageNum) * displayPageNum;
-		
-		startPage = (endPage - displayPageNum)+1;
-		
-		int tmpEndPage = (int) Math.ceil(totalCount/(double)cri.getPageAmount());
-		
-		if(endPage > tmpEndPage) {
-			endPage = tmpEndPage;
-		}
-		
-		prev = (startPage == 1? false : true);
-		
-		next = endPage * cri.getPageAmount() >= totalCount? false : true;
-		System.out.println(" -----  페이징 처리에 필요한 정보 계산 -----");
-	}
+    // 페이징 처리에 관련된 동작 수행
 
-	// get/set
-	public int getStartPage() {
-		return startPage;
-	}
+    // 현제페이지, 페이지에 출력되는 게시판 글의 개수 페이징처리
+    private Criteria cri;
 
-	public void setStartPage(int startPage) {
-		this.startPage = startPage;
-	}
+    // 페이지 하단부에 처리되는 페이징 처리
+    // 전체 게시물 수
+    private int totalCount;
 
-	public int getEndPage() {
-		return endPage;
-	}
+    // 시작 페이지
+    private int startPage;
 
-	public void setEndPage(int endPage) {
-		this.endPage = endPage;
-	}
+    // 끝페이지
+    private int endPage;
 
-	public boolean isPrev() {
-		return prev;
-	}
+    // 이전페이지 다음페이지 존재유무
+    private boolean prev;
+    private boolean next;
 
-	public void setPrev(boolean prev) {
-		this.prev = prev;
-	}
+    private int displayPageNum = 10; //페이지 블럭
 
-	public boolean isNext() {
-		return next;
-	}
+    public void setCri(Criteria cri) {
+        this.cri = cri;
+    }
 
-	public void setNext(boolean next) {
-		this.next = next;
-	}
+    // 총 개수 계산
+    public void setTotalCount(int totalCount) {
 
-	public int getDisplayPageNum() {
-		return displayPageNum;
-	}
+        this.totalCount = totalCount;
 
-	public void setDisplayPageNum(int displayPageNum) {
-		this.displayPageNum = displayPageNum;
-	}
+        // 페이징에 필요한 정보처리
+        CalcData();
+    }
 
-	public Criteria getCri() {
-		return cri;
-	}
+    public void CalcData() {
+        endPage = (int) Math.ceil(cri.getPageNum() / (double) displayPageNum) * displayPageNum;
 
-	public int getTotalCount() {
-		return totalCount;
-	}
+        startPage = (endPage - displayPageNum) + 1;
 
-		
-	@Override
-	public String toString() {
-		return "PageMaker [cri=" + cri + ", totalCount=" + totalCount + ", startPage=" + startPage + ", endPage="
-				+ endPage + ", prev=" + prev + ", next=" + next + ", displayPageNum=" + displayPageNum + "]";
-	}
-	
-	
-	
-	
-	
-	
-	
+        int tmpEndPage = (int) Math.ceil(totalCount / (double) cri.getPageAmount());
+
+        if (endPage > tmpEndPage) {
+            endPage = tmpEndPage;
+        }
+
+        prev = (startPage == 1 ? false : true);
+        next = endPage * cri.getPageAmount() >= totalCount ? false : true;
+    }
+
+    // get/set
+    public int getStartPage() {
+        return startPage;
+    }
+
+    public void setStartPage(int startPage) {
+        this.startPage = startPage;
+    }
+
+    public int getEndPage() {
+        return endPage;
+    }
+
+    public void setEndPage(int endPage) {
+        this.endPage = endPage;
+    }
+
+    public boolean isPrev() {
+        return prev;
+    }
+
+    public void setPrev(boolean prev) {
+        this.prev = prev;
+    }
+
+    public boolean isNext() {
+        return next;
+    }
+
+    public void setNext(boolean next) {
+        this.next = next;
+    }
+
+    public int getDisplayPageNum() {
+        return displayPageNum;
+    }
+
+    public void setDisplayPageNum(int displayPageNum) {
+        this.displayPageNum = displayPageNum;
+    }
+
+    public Criteria getCri() {
+        return cri;
+    }
+
+    public int getTotalCount() {
+        return totalCount;
+    }
+
+
+    @Override
+    public String toString() {
+        return "PageMaker [cri=" + cri + ", totalCount=" + totalCount + ", startPage=" + startPage + ", endPage="
+                + endPage + ", prev=" + prev + ", next=" + next + ", displayPageNum=" + displayPageNum + "]";
+    }
+
+
 }
