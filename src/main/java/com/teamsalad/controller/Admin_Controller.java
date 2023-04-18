@@ -1,658 +1,527 @@
 package com.teamsalad.controller;
 
-import java.io.File;
-import java.util.List;
-import java.util.Random;
-
-import javax.inject.Inject;
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-
+import com.teamsalad.domain.*;
+import com.teamsalad.service.AdminService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.teamsalad.domain.Criteria;
-import com.teamsalad.domain.PageMaker;
-import com.teamsalad.domain.couponVO;
-import com.teamsalad.domain.ingredientVO;
-import com.teamsalad.domain.memberVO;
-import com.teamsalad.domain.orderVO;
-import com.teamsalad.domain.recipeBoardVO;
-import com.teamsalad.service.AdminService;
+import javax.inject.Inject;
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+import java.io.File;
+import java.util.List;
+import java.util.Random;
 
 @Controller
-@RequestMapping("/Admin/*")
+@RequestMapping("/Admin")
 public class Admin_Controller {
 
-	private static final Logger logger = LoggerFactory.getLogger(Admin_Controller.class);
-
-	@Inject
-	private AdminService service;
-
-	// 관리자 메인 페이지(GET)
-	// http://localhost:8080/Admin/main
-	@RequestMapping(value = "/main", method = RequestMethod.GET)
-	public String adminMainGET(HttpSession session, Model model) throws Exception {
-
-		logger.info(" C: adminMainGET() 호출");
-
-		String admin_id = (String) session.getAttribute("m_id");
-		
-		int pageNum = 1;
-
-		if (admin_id == null || !admin_id.equals("admin")) {
-			return "redirect:/Admin/notAdminAccess";
-		}
-		// 최근 주문 리스트 전달
-		List<orderVO> recentOList = service.getRecentOrder();
-		// 인기 레시피 리스트 전달
-		List<recipeBoardVO> popularRList = service.getPopularRecipe();
-		
-		model.addAttribute("pageNum", pageNum);
-		model.addAttribute("recentOList", recentOList);
-		model.addAttribute("popularRList", popularRList);
-
-		return "/Admin/main";
-	}
-	
-	// 권한없는 잘못된 접근(GET)
-	@RequestMapping(value = "/notAdminAccess", method = RequestMethod.GET)
-	public void notAdminAccessGET() throws Exception {
-		
-		logger.info(" notAdminAccessGET() 호출 ");
-	}
-	
-	// 관리자 정보 등록 성공(GET)
-	@RequestMapping(value = "/registerSuccess", method = RequestMethod.GET)
-	public void registerSuccessGET() throws Exception {
-		
-		logger.info(" registerSuccessGET() 호출 ");
-	}
-
-	////////////////////////////////////////////////////////////회원정보관련/////////////////////////////////////////////////////////////////////////
-	
-	// 회원 전체 리스트 출력(GET)
-	@RequestMapping(value = "/mListAll", method = RequestMethod.GET)
-	public String memberListAllGET(HttpSession session, Criteria cri, Model model) throws Exception {
-
-		logger.info(" C: mListAll() 호출");
-
-		String admin_id = (String) session.getAttribute("m_id");
-		
-		if (admin_id == null || !admin_id.equals("admin")) {
-			return "redirect:/Admin/notAdminAccess";
-		}
-
-		// 페이징처리 정보생성 (하단부)
-		PageMaker pm = new PageMaker();
-		pm.setCri(cri);
-		pm.setTotalCount(service.countMembers(cri));
-
-		// Criteria 객체 정보 저장(pageStart/pageSize)
-		model.addAttribute("mListAll", service.mListCri(cri));
-		model.addAttribute("pm", pm);
-
-		return "/Admin/mListAll";
-	}
-
-	// 개별 회원 정보 조회(GET)
-	@RequestMapping(value = "/mInfo", method = RequestMethod.GET)
-	public String memberInfoGET(HttpSession session, String m_id, Model model, Integer pageNum) throws Exception {
-
-		String admin_id = (String) session.getAttribute("m_id");
-
-		if (admin_id == null || !admin_id.equals("admin")) {
-			return "redirect:/Admin/notAdminAccess";
-		}
-
-		logger.info(" C: memberInfoGET() 호출");
-		
-		memberVO mvo = service.getMInfo(m_id);
-		
-		// 쿠폰 정보도 같이 전달
-		int coupon_id = mvo.getM_coupon();
-		
-		model.addAttribute("cvo", service.getCouponInfo(coupon_id));
-		model.addAttribute("mvo", mvo);
-		model.addAttribute("pageNum", pageNum);
-
-		return "/Admin/mInfo";
-	}
-	
-	// 검색용 회원 정보 조회(GET)
-	@RequestMapping(value = "/mInfoSeq", method = RequestMethod.GET)
-	public String memberInfoSeqGET(HttpSession session, Integer m_seq, Model model, Integer pageNum) throws Exception {
-
-		String admin_id = (String) session.getAttribute("m_id");
-
-		if (admin_id == null || !admin_id.equals("admin")) {
-			return "redirect:/Admin/notAdminAccess";
-		}
+    @Inject
+    private AdminService service;
 
-		logger.info(" C: memberInfoGET() 호출");
+    // 관리자 메인 페이지(GET)
+    // http://localhost:8080/Admin/main
+    @RequestMapping(value = "/main", method = RequestMethod.GET)
+    public String adminMainGET(HttpSession session, Model model) throws Exception {
+        String admin_id = (String) session.getAttribute("m_id");
+        int pageNum = 1;
 
-		model.addAttribute("mvo", service.getMInfoSeq(m_seq));
-		model.addAttribute("pageNum", pageNum);
+        if (admin_id == null || !admin_id.equals("admin")) {
+            return "redirect:/Admin/notAdminAccess";
+        }
 
-		return "/Admin/mInfo";
-	}
-	
+        // 최근 주문 리스트 전달
+        List<orderVO> recentOList = service.getRecentOrder();
 
-	// 개별 회원 정보 수정(GET)
-	@RequestMapping(value = "/mUpdate", method = RequestMethod.GET)
-	public String memberUpdateGET(HttpSession session, String m_id, Model model) throws Exception {
+        // 인기 레시피 리스트 전달
+        List<recipeBoardVO> popularRList = service.getPopularRecipe();
 
-		String admin_id = (String) session.getAttribute("m_id");
+        model.addAttribute("pageNum", pageNum);
+        model.addAttribute("recentOList", recentOList);
+        model.addAttribute("popularRList", popularRList);
 
-		if (admin_id == null || !admin_id.equals("admin")) {
-			return "redirect:/Admin/notAdminAccess";
-		}
+        return "/Admin/main";
+    }
 
-		logger.info(" C: memberUpdateGET() 호출 ");
+    // 권한없는 잘못된 접근(GET)
+    @RequestMapping(value = "/notAdminAccess", method = RequestMethod.GET)
+    public void notAdminAccessGET() throws Exception {
+    }
 
-		model.addAttribute("mvo", service.getMInfo(m_id));
+    // 관리자 정보 등록 성공(GET)
+    @RequestMapping(value = "/registerSuccess", method = RequestMethod.GET)
+    public void registerSuccessGET() throws Exception {
+    }
 
-		return "Admin/mUpdate";
-	}
+    ////////////////////////////////////////////////////////////회원정보관련/////////////////////////////////////////////////////////////////////////
 
-	// 개별 회원 정보 수정(POST)
-	@RequestMapping(value = "/mUpdate", method = RequestMethod.POST)
-	public String memberUpdatePOST(memberVO uvo) throws Exception {
+    // 회원 전체 리스트 출력(GET)
+    @RequestMapping(value = "/mListAll", method = RequestMethod.GET)
+    public String memberListAllGET(HttpSession session, Criteria cri, Model model) throws Exception {
+        String admin_id = (String) session.getAttribute("m_id");
 
-		logger.info(" C: memberUpdatePOST() 호출 ");
-		
-		service.updateMember(uvo);
+        if (admin_id == null || !admin_id.equals("admin")) {
+            return "redirect:/Admin/notAdminAccess";
+        }
 
-		return "redirect:/Admin/mListAll";
-	}
+        // 페이징처리 정보생성 (하단부)
+        PageMaker pm = new PageMaker();
+        pm.setCri(cri);
+        pm.setTotalCount(service.countMembers(cri));
 
-	// 개별 회원 정보 삭제(GET)
-	@RequestMapping(value = "/mDelete", method = RequestMethod.GET)
-	public String memberDeleteGET(HttpSession session, String m_id) throws Exception {
+        // Criteria 객체 정보 저장(pageStart/pageSize)
+        model.addAttribute("mListAll", service.mListCri(cri));
+        model.addAttribute("pm", pm);
 
-		String admin_id = (String) session.getAttribute("m_id");
+        return "/Admin/mListAll";
+    }
 
-		if (admin_id == null || !admin_id.equals("admin")) {
-			return "redirect:/Admin/notAdminAccess";
-		}
+    // 개별 회원 정보 조회(GET)
+    @RequestMapping(value = "/mInfo", method = RequestMethod.GET)
+    public String memberInfoGET(HttpSession session, String m_id, Model model, Integer pageNum) throws Exception {
+        String admin_id = (String) session.getAttribute("m_id");
 
-		logger.info(" memberDeletePOST() 호출 ");
+        if (admin_id == null || !admin_id.equals("admin")) {
+            return "redirect:/Admin/notAdminAccess";
+        }
 
-		service.deleteMember(m_id);
-		
-		return "redirect:/Admin/mListAll";
-	}
+        memberVO mvo = service.getMInfo(m_id);
 
-	////////////////////////////////////////////////////////////주문관련/////////////////////////////////////////////////////////////////////////
-	
-	// 전체 주문 목록 조회(GET)
-	@RequestMapping(value = "/oListAll", method = RequestMethod.GET)
-	public String orderListAllGET(HttpSession session, Criteria cri, Model model) throws Exception {
+        // 쿠폰 정보도 같이 전달
+        int coupon_id = mvo.getM_coupon();
 
-		logger.info(" C: orderListAllGET() 호출");
+        model.addAttribute("cvo", service.getCouponInfo(coupon_id));
+        model.addAttribute("mvo", mvo);
+        model.addAttribute("pageNum", pageNum);
 
-		String admin_id = (String) session.getAttribute("m_id");
+        return "/Admin/mInfo";
+    }
 
-		if (admin_id == null || !admin_id.equals("admin")) {
-			return "redirect:/Admin/notAdminAccess";
-		}
+    // 검색용 회원 정보 조회(GET)
+    @RequestMapping(value = "/mInfoSeq", method = RequestMethod.GET)
+    public String memberInfoSeqGET(HttpSession session, Integer m_seq, Model model, Integer pageNum) throws Exception {
+        String admin_id = (String) session.getAttribute("m_id");
 
-		// 페이징처리 정보생성 (하단부)
-		PageMaker pm = new PageMaker();
-		pm.setCri(cri);
-		pm.setTotalCount(service.countOrders(cri));
+        if (admin_id == null || !admin_id.equals("admin")) {
+            return "redirect:/Admin/notAdminAccess";
+        }
 
-		// Criteria 객체 정보 저장(pageStart/pageSize)
-		model.addAttribute("oListAll", service.oListCri(cri));
-		model.addAttribute("pm", pm);
+        model.addAttribute("mvo", service.getMInfoSeq(m_seq));
+        model.addAttribute("pageNum", pageNum);
 
-		return "/Admin/oListAll";
-	}
+        return "/Admin/mInfo";
+    }
 
-	// 개별 주문 정보 조회(GET)
-	@RequestMapping(value = "/oInfo", method = RequestMethod.GET)
-	public String orderInfoGET(HttpSession session, Integer order_num, Model model, Integer pageNum) throws Exception {
 
-		logger.info(" C: orderInfoGET() 호출");
+    // 개별 회원 정보 수정(GET)
+    @RequestMapping(value = "/mUpdate", method = RequestMethod.GET)
+    public String memberUpdateGET(HttpSession session, String m_id, Model model) throws Exception {
+        String admin_id = (String) session.getAttribute("m_id");
 
-		String admin_id = (String) session.getAttribute("m_id");
+        if (admin_id == null || !admin_id.equals("admin")) {
+            return "redirect:/Admin/notAdminAccess";
+        }
 
-		if (admin_id == null || !admin_id.equals("admin")) {
-			return "redirect:/Admin/notAdminAccess";
-		}
+        model.addAttribute("mvo", service.getMInfo(m_id));
 
-		orderVO ovo = service.getOInfo(order_num);
-		
-		// 주문정보 속 쿠폰정보 전달
-		int coupon_id = ovo.getCoupon_id();
-		
-		model.addAttribute("cvo", service.getCouponInfo(coupon_id));
-		model.addAttribute("ovo", ovo);
-		model.addAttribute("pageNum", pageNum);
+        return "Admin/mUpdate";
+    }
 
-		return "/Admin/oInfo";
+    // 개별 회원 정보 수정(POST)
+    @RequestMapping(value = "/mUpdate", method = RequestMethod.POST)
+    public String memberUpdatePOST(memberVO uvo) throws Exception {
+        service.updateMember(uvo);
+        return "redirect:/Admin/mListAll";
+    }
 
-	}
+    // 개별 회원 정보 삭제(GET)
+    @RequestMapping(value = "/mDelete", method = RequestMethod.GET)
+    public String memberDeleteGET(HttpSession session, String m_id) throws Exception {
+        String admin_id = (String) session.getAttribute("m_id");
 
-	// 개별 주문 정보 수정(GET)
-	@RequestMapping(value = "/oUpdate", method = RequestMethod.GET)
-	public String orderUpdateGET(HttpSession session, Integer order_num, Model model) throws Exception {
+        if (admin_id == null || !admin_id.equals("admin")) {
+            return "redirect:/Admin/notAdminAccess";
+        }
 
-		logger.info(" C: orderUpdateGET() 호출 ");
+        service.deleteMember(m_id);
 
-		String admin_id = (String) session.getAttribute("m_id");
+        return "redirect:/Admin/mListAll";
+    }
 
-		if (admin_id == null || !admin_id.equals("admin")) {
-			return "redirect:/Admin/notAdminAccess";
-		}
-		
-		orderVO ovo = service.getOInfo(order_num);
-		
-		int coupon_id = ovo.getCoupon_id();
-		
-		model.addAttribute("cvo", service.getCouponInfo(coupon_id));
-		model.addAttribute("ovo", service.getOInfo(order_num));
+    ////////////////////////////////////////////////////////////주문관련/////////////////////////////////////////////////////////////////////////
 
-		logger.info("/Admin/oUpdate.jsp 페이지로 이동");
+    // 전체 주문 목록 조회(GET)
+    @RequestMapping(value = "/oListAll", method = RequestMethod.GET)
+    public String orderListAllGET(HttpSession session, Criteria cri, Model model) throws Exception {
+        String admin_id = (String) session.getAttribute("m_id");
 
-		return "/Admin/oUpdate";
-	}
+        if (admin_id == null || !admin_id.equals("admin")) {
+            return "redirect:/Admin/notAdminAccess";
+        }
 
-	// 개별 주문 정보 수정(POST)
-	@RequestMapping(value = "/oUpdate", method = RequestMethod.POST)
-	public String orderUpdatePOST(orderVO ovo) throws Exception {
+        // 페이징처리 정보생성 (하단부)
+        PageMaker pm = new PageMaker();
+        pm.setCri(cri);
+        pm.setTotalCount(service.countOrders(cri));
 
-		logger.info(" C: orderUpdatePOST() 호출 ");
+        // Criteria 객체 정보 저장(pageStart/pageSize)
+        model.addAttribute("oListAll", service.oListCri(cri));
+        model.addAttribute("pm", pm);
 
-		service.updateOrder(ovo);
+        return "/Admin/oListAll";
+    }
 
-		return "redirect:/Admin/oListAll";
-	}
+    // 개별 주문 정보 조회(GET)
+    @RequestMapping(value = "/oInfo", method = RequestMethod.GET)
+    public String orderInfoGET(HttpSession session, Integer order_num, Model model, Integer pageNum) throws Exception {
+        String admin_id = (String) session.getAttribute("m_id");
 
-	// 개별 주문 정보 삭제(GET)
-	@RequestMapping(value = "/oDelete", method = RequestMethod.GET)
-	public String orderDeleteGET(HttpSession session, Integer order_num) throws Exception {
+        if (admin_id == null || !admin_id.equals("admin")) {
+            return "redirect:/Admin/notAdminAccess";
+        }
 
-		logger.info(" orderDeleteGET() 호출 ");
+        orderVO ovo = service.getOInfo(order_num);
 
-		String admin_id = (String) session.getAttribute("m_id");
+        // 주문정보 속 쿠폰정보 전달
+        int coupon_id = ovo.getCoupon_id();
 
-		if (admin_id == null || !admin_id.equals("admin")) {
-			return "redirect:/Admin/notAdminAccess";
-		}
+        model.addAttribute("cvo", service.getCouponInfo(coupon_id));
+        model.addAttribute("ovo", ovo);
+        model.addAttribute("pageNum", pageNum);
 
-		service.deleteOrder(order_num);
+        return "/Admin/oInfo";
+    }
 
-		return "redirect:/Admin/oListAll";
-	}
-	
-	////////////////////////////////////////////////////////////재료 재고 정보 관련////////////////////////////////////////////////////////////////////
+    // 개별 주문 정보 수정(GET)
+    @RequestMapping(value = "/oUpdate", method = RequestMethod.GET)
+    public String orderUpdateGET(HttpSession session, Integer order_num, Model model) throws Exception {
+        String admin_id = (String) session.getAttribute("m_id");
 
-	// 샐러드 재료 전체 리스트 출력(GET)
-	@RequestMapping(value = "/igdtListAll", method = RequestMethod.GET)
-	public String igdtListAllGET(HttpSession session, Criteria cri, Model model) throws Exception {
+        if (admin_id == null || !admin_id.equals("admin")) {
+            return "redirect:/Admin/notAdminAccess";
+        }
 
-		logger.info(" C: igdtListAll() 호출");
+        orderVO ovo = service.getOInfo(order_num);
 
-		String admin_id = (String) session.getAttribute("m_id");
+        int coupon_id = ovo.getCoupon_id();
 
-		if (admin_id == null || !admin_id.equals("admin")) {
-			return "redirect:/Admin/notAdminAccess";
-		}
+        model.addAttribute("cvo", service.getCouponInfo(coupon_id));
+        model.addAttribute("ovo", service.getOInfo(order_num));
 
-		// 페이징처리 정보생성 (하단부)
-		PageMaker pm = new PageMaker();
-		pm.setCri(cri);
-		pm.setTotalCount(service.countIngredients(cri));
+        return "/Admin/oUpdate";
+    }
 
-		// Criteria 객체 정보 저장(pageStart/pageSize)
-		model.addAttribute("igdtListAll", service.igdtListCri(cri));
-		model.addAttribute("pm", pm);
+    // 개별 주문 정보 수정(POST)
+    @RequestMapping(value = "/oUpdate", method = RequestMethod.POST)
+    public String orderUpdatePOST(orderVO ovo) throws Exception {
+        service.updateOrder(ovo);
 
-		return "/Admin/igdtListAll";
-	}
+        return "redirect:/Admin/oListAll";
+    }
 
-	// 샐러드 재료 등록(GET)
-	@RequestMapping(value = "/igdtRegister", method = RequestMethod.GET)
-	public String igdtRegisterGET(HttpSession session) throws Exception {
+    // 개별 주문 정보 삭제(GET)
+    @RequestMapping(value = "/oDelete", method = RequestMethod.GET)
+    public String orderDeleteGET(HttpSession session, Integer order_num) throws Exception {
+        String admin_id = (String) session.getAttribute("m_id");
 
-		logger.info("igdtRegisterGET() 호출");
+        if (admin_id == null || !admin_id.equals("admin")) {
+            return "redirect:/Admin/notAdminAccess";
+        }
 
-		String admin_id = (String) session.getAttribute("m_id");
+        service.deleteOrder(order_num);
 
-		if (admin_id == null || !admin_id.equals("admin")) {
-			return "redirect:/Admin/notAdminAccess";
-		}
+        return "redirect:/Admin/oListAll";
+    }
 
-		return "/Admin/igdtRegister";
-	}
+    ////////////////////////////////////////////////////////////재료 재고 정보 관련////////////////////////////////////////////////////////////////////
 
-	// 샐러드 재료 등록(POST)
-	@RequestMapping(value = "/igdtRegister", method = RequestMethod.POST)
-	public String igdtRegisterPOST(ingredientVO ivo) throws Exception {
+    // 샐러드 재료 전체 리스트 출력(GET)
+    @RequestMapping(value = "/igdtListAll", method = RequestMethod.GET)
+    public String igdtListAllGET(HttpSession session, Criteria cri, Model model) throws Exception {
+        String admin_id = (String) session.getAttribute("m_id");
 
-		logger.info("igdtRegisterPOST() 호출");
+        if (admin_id == null || !admin_id.equals("admin")) {
+            return "redirect:/Admin/notAdminAccess";
+        }
 
-		service.igdtRegister(ivo);
+        // 페이징처리 정보생성 (하단부)
+        PageMaker pm = new PageMaker();
+        pm.setCri(cri);
+        pm.setTotalCount(service.countIngredients(cri));
 
-		return "redirect:/Admin/igdtListAll";
-	}
+        // Criteria 객체 정보 저장(pageStart/pageSize)
+        model.addAttribute("igdtListAll", service.igdtListCri(cri));
+        model.addAttribute("pm", pm);
 
-	// 샐러드 재료 사진업로드 기능(POST)
-	@RequestMapping(value = "/igdtImgRegister", method = RequestMethod.POST)
-	public void igdtImgRegisterPOST(MultipartFile igdt_main_img, HttpServletRequest request) throws Exception {
+        return "/Admin/igdtListAll";
+    }
 
-		logger.info("igdtImgRegisterPOST() 실행");
+    // 샐러드 재료 등록(GET)
+    @RequestMapping(value = "/igdtRegister", method = RequestMethod.GET)
+    public String igdtRegisterGET(HttpSession session) throws Exception {
+        String admin_id = (String) session.getAttribute("m_id");
 
-		ServletContext servletContext = request.getSession().getServletContext();
-		String uploadFolder = servletContext.getRealPath("./resources/upload");
+        if (admin_id == null || !admin_id.equals("admin")) {
+            return "redirect:/Admin/notAdminAccess";
+        }
 
-		// 폴더생성
-		File uploadPath = new File(uploadFolder);
-		
-		if (uploadPath.exists() == false) {
-			uploadPath.mkdirs();
-		}
+        return "/Admin/igdtRegister";
+    }
 
-		// 파일 이름
-		String uploadFileName = igdt_main_img.getOriginalFilename();
+    // 샐러드 재료 등록(POST)
+    @RequestMapping(value = "/igdtRegister", method = RequestMethod.POST)
+    public String igdtRegisterPOST(ingredientVO ivo) throws Exception {
+        service.igdtRegister(ivo);
 
-		// 파일 위치, 파일 이름을 합친 File 객체
-		File saveFile = new File(uploadPath, uploadFileName);
+        return "redirect:/Admin/igdtListAll";
+    }
 
-		// 파일 저장
-		try {
-			igdt_main_img.transferTo(saveFile);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+    // 샐러드 재료 사진업로드 기능(POST)
+    @RequestMapping(value = "/igdtImgRegister", method = RequestMethod.POST)
+    public void igdtImgRegisterPOST(MultipartFile igdt_main_img, HttpServletRequest request) throws Exception {
 
-	// 개별 재료 정보 조회(GET)
-	@RequestMapping(value = "/igdtInfo", method = RequestMethod.GET)
-	public String igdtInfoGET(HttpSession session, Integer igdt_num, Model model, Integer pageNum) throws Exception {
+        ServletContext servletContext = request.getSession().getServletContext();
+        String uploadFolder = servletContext.getRealPath("./resources/upload");
 
-		logger.info(" C: igdtInfoGET() 호출");
+        // 폴더생성
+        File uploadPath = new File(uploadFolder);
 
-		String admin_id = (String) session.getAttribute("m_id");
+        if (uploadPath.exists() == false) {
+            uploadPath.mkdirs();
+        }
 
-		if (admin_id == null || !admin_id.equals("admin")) {
-			return "redirect:/Admin/notAdminAccess";
-		}
+        // 파일 이름
+        String uploadFileName = igdt_main_img.getOriginalFilename();
 
-		ingredientVO ivo = service.getIgdtInfo(igdt_num);
+        // 파일 위치, 파일 이름을 합친 File 객체
+        File saveFile = new File(uploadPath, uploadFileName);
 
-		model.addAttribute("ivo", ivo);
-		model.addAttribute("pageNum", pageNum);
+        // 파일 저장
+        try {
+            igdt_main_img.transferTo(saveFile);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-		return "/Admin/igdtInfo";
-	}
+    // 개별 재료 정보 조회(GET)
+    @RequestMapping(value = "/igdtInfo", method = RequestMethod.GET)
+    public String igdtInfoGET(HttpSession session, Integer igdt_num, Model model, Integer pageNum) throws Exception {
+        String admin_id = (String) session.getAttribute("m_id");
 
-	// 개별 재료 정보 수정(GET)
-	@RequestMapping(value = "igdtUpdate", method = RequestMethod.GET)
-	public String igdtUpdateGET(HttpSession session, Integer igdt_num, Model model, Integer pageNum) throws Exception {
+        if (admin_id == null || !admin_id.equals("admin")) {
+            return "redirect:/Admin/notAdminAccess";
+        }
 
-		logger.info(" C: igdtUpdateGET() 호출 ");
+        ingredientVO ivo = service.getIgdtInfo(igdt_num);
 
-		String admin_id = (String) session.getAttribute("m_id");
+        model.addAttribute("ivo", ivo);
+        model.addAttribute("pageNum", pageNum);
 
-		if (admin_id == null || !admin_id.equals("admin")) {
-			return "redirect:/Admin/notAdminAccess";
-		}
+        return "/Admin/igdtInfo";
+    }
 
-		model.addAttribute("ivo", service.getIgdtInfo(igdt_num));
-		model.addAttribute("pageNum", pageNum);
+    // 개별 재료 정보 수정(GET)
+    @RequestMapping(value = "igdtUpdate", method = RequestMethod.GET)
+    public String igdtUpdateGET(HttpSession session, Integer igdt_num, Model model, Integer pageNum) throws Exception {
+        String admin_id = (String) session.getAttribute("m_id");
 
-		logger.info("/Admin/igdtUpdate.jsp 페이지로 이동");
+        if (admin_id == null || !admin_id.equals("admin")) {
+            return "redirect:/Admin/notAdminAccess";
+        }
 
-		return "/Admin/igdtUpdate";
-	}
+        model.addAttribute("ivo", service.getIgdtInfo(igdt_num));
+        model.addAttribute("pageNum", pageNum);
 
-	// 개별 재료 재고 정보 수정(POST)
-	@RequestMapping(value = "/igdtUpdate", method = RequestMethod.POST)
-	public String igdtUpdatePOST(ingredientVO ivo) throws Exception {
+        return "/Admin/igdtUpdate";
+    }
 
-		logger.info(" C: igdtUpdatePOST() 호출 ");
-		
-		service.updateIngredient(ivo);
+    // 개별 재료 재고 정보 수정(POST)
+    @RequestMapping(value = "/igdtUpdate", method = RequestMethod.POST)
+    public String igdtUpdatePOST(ingredientVO ivo) throws Exception {
+        service.updateIngredient(ivo);
+        return "redirect:/Admin/igdtListAll";
+    }
 
-		logger.info(" 재료 재고 정보 수정 완료");
+    // 개별 재료 정보 삭제(GET)
+    @RequestMapping(value = "/igdtDelete", method = RequestMethod.GET)
+    public String ingredientDeleteGET(HttpSession session, Integer igdt_num) throws Exception {
+        String admin_id = (String) session.getAttribute("m_id");
 
-		return "redirect:/Admin/igdtListAll";
+        if (admin_id == null || !admin_id.equals("admin")) {
+            return "redirect:/Admin/notAdminAccess";
+        }
 
-	}
-	
-	// 개별 재료 정보 삭제(GET)
-	@RequestMapping(value = "/igdtDelete", method = RequestMethod.GET)
-	public String ingredientDeleteGET(HttpSession session, Integer igdt_num) throws Exception {
+        service.deleteIngredient(igdt_num);
 
-		String admin_id = (String) session.getAttribute("m_id");
+        return "redirect:/Admin/igdtListAll";
+    }
 
-		if (admin_id == null || !admin_id.equals("admin")) {
-			return "redirect:/Admin/notAdminAccess";
-		}
+    ////////////////////////////////////////////////////////////쿠폰 정보 관련////////////////////////////////////////////////////////////////////
 
-		logger.info(" ingredientDeleteGET() 호출 ");
+    // 쿠폰 전체 리스트 출력(GET)
+    @RequestMapping(value = "/couponListAll", method = RequestMethod.GET)
+    public String couponListAllGET(HttpSession session, Criteria cri, Model model) throws Exception {
+        String admin_id = (String) session.getAttribute("m_id");
 
-		service.deleteIngredient(igdt_num);	
+        if (admin_id == null || !admin_id.equals("admin")) {
+            return "redirect:/Admin/notAdminAccess";
+        }
 
-		logger.info("삭제완료 main.jsp 페이지로 이동 (화면전환)");
+        // 페이징처리 정보생성 (하단부)
+        PageMaker pm = new PageMaker();
+        pm.setCri(cri);
+        pm.setTotalCount(service.countCoupons(cri));
 
-		return "redirect:/Admin/igdtListAll";
-	}
-	
-	////////////////////////////////////////////////////////////쿠폰 정보 관련////////////////////////////////////////////////////////////////////
-	
-	// 쿠폰 전체 리스트 출력(GET)
-	@RequestMapping(value = "/couponListAll", method = RequestMethod.GET)
-	public String couponListAllGET(HttpSession session, Criteria cri, Model model) throws Exception {
+        // Criteria 객체 정보 저장(pageStart/pageSize)
+        model.addAttribute("couponListAll", service.couponListCri(cri));
+        model.addAttribute("pm", pm);
 
-		logger.info(" C: couponListAll() 호출");
+        return "/Admin/couponListAll";
+    }
 
-		String admin_id = (String) session.getAttribute("m_id");
+    // 쿠폰 개별 상세정보 조회(GET)
+    @RequestMapping(value = "/couponInfo", method = RequestMethod.GET)
+    public String couponInfoGET(HttpSession session, Integer coupon_id, Model model, Integer pageNum) throws Exception {
+        String admin_id = (String) session.getAttribute("m_id");
 
-		if (admin_id == null || !admin_id.equals("admin")) {
-			return "redirect:/Admin/notAdminAccess";
-		}
+        if (admin_id == null || !admin_id.equals("admin")) {
+            return "redirect:/Admin/notAdminAccess";
+        }
 
-		// 페이징처리 정보생성 (하단부)
-		PageMaker pm = new PageMaker();
-		pm.setCri(cri);
-		pm.setTotalCount(service.countCoupons(cri));
+        couponVO cvo = service.getCouponInfo(coupon_id);
 
-		// Criteria 객체 정보 저장(pageStart/pageSize)
-		model.addAttribute("couponListAll", service.couponListCri(cri));
-		model.addAttribute("pm", pm);
+        model.addAttribute("cvo", cvo);
+        model.addAttribute("pageNum", pageNum);
 
-		return "/Admin/couponListAll";
-	}
-	
-	// 쿠폰 개별 상세정보 조회(GET)
-	@RequestMapping(value = "/couponInfo", method = RequestMethod.GET)
-	public String couponInfoGET(HttpSession session, Integer coupon_id, Model model, Integer pageNum) throws Exception {
+        return "/Admin/couponInfo";
+    }
 
-		logger.info(" C: couponInfoGET() 호출");
+    // 쿠폰 발급 회원 조회(GET)
+    @RequestMapping(value = "/couponMList", method = RequestMethod.GET)
+    public String couponMListGET(Model model, Integer coupon_id) throws Exception {
+        model.addAttribute("couponMList", service.getCouponMList(coupon_id));
 
-		String admin_id = (String) session.getAttribute("m_id");
+        return "/Admin/couponMList";
+    }
 
-		if (admin_id == null || !admin_id.equals("admin")) {
-			return "redirect:/Admin/notAdminAccess";
-		}
+    // 개별 쿠폰 정보 수정(GET)
+    @RequestMapping(value = "/couponUpdate", method = RequestMethod.GET)
+    public String couponUpdateGET(HttpSession session, Integer coupon_id, Model model, Integer pageNum) throws Exception {
+        String admin_id = (String) session.getAttribute("m_id");
 
-		couponVO cvo = service.getCouponInfo(coupon_id);
+        if (admin_id == null || !admin_id.equals("admin")) {
+            return "redirect:/Admin/notAdminAccess";
+        }
 
-		model.addAttribute("cvo", cvo);
-		model.addAttribute("pageNum", pageNum);
+        model.addAttribute("cvo", service.getCouponInfo(coupon_id));
+        model.addAttribute("pageNum", pageNum);
 
-		return "/Admin/couponInfo";
-	}
-	
-	// 쿠폰 발급 회원 조회(GET)	
-	@RequestMapping(value = "/couponMList", method = RequestMethod.GET)
-	public String couponMListGET(Model model, Integer coupon_id) throws Exception {
-		
-		logger.info(" C: couponMListGET() 호출");
+        return "/Admin/couponUpdate";
+    }
 
-		model.addAttribute("couponMList", service.getCouponMList(coupon_id));
+    // 개별 쿠폰 정보 수정(POST)
+    @RequestMapping(value = "/couponUpdate", method = RequestMethod.POST)
+    public String couponUpdatePOST(couponVO cvo, Integer pageNum) throws Exception {
+        service.updateCoupon(cvo);
+        return "redirect:/Admin/couponListAll?pageNum=" + pageNum;
+    }
 
-		return "/Admin/couponMList";
-	}
-	
-	// 개별 쿠폰 정보 수정(GET)
-	@RequestMapping(value = "/couponUpdate", method = RequestMethod.GET)
-	public String couponUpdateGET(HttpSession session, Integer coupon_id, Model model, Integer pageNum) throws Exception {
+    // 개별 쿠폰 정보 삭제(GET)
+    @RequestMapping(value = "/couponDelete", method = RequestMethod.GET)
+    public String couponDeleteGET(HttpSession session, Integer coupon_id, Integer pageNum) throws Exception {
+        String admin_id = (String) session.getAttribute("m_id");
 
-		logger.info(" C: couponUpdateGET() 호출 ");
+        if (admin_id == null || !admin_id.equals("admin")) {
+            return "redirect:/Admin/notAdminAccess";
+        }
 
-		String admin_id = (String) session.getAttribute("m_id");
+        service.deleteCoupon(coupon_id);
 
-		if (admin_id == null || !admin_id.equals("admin")) {
-			return "redirect:/Admin/notAdminAccess";
-		}
+        return "redirect:/Admin/couponListAll?pageNum=" + pageNum;
+    }
 
-		model.addAttribute("cvo", service.getCouponInfo(coupon_id));
-		model.addAttribute("pageNum", pageNum);
+    // 쿠폰 등록(GET)
+    @RequestMapping(value = "/couponRegister", method = RequestMethod.GET)
+    public String couponRegisterGET(HttpSession session) throws Exception {
+        String admin_id = (String) session.getAttribute("m_id");
 
-		logger.info("/Admin/couponUpdate.jsp 페이지로 이동");
+        if (admin_id == null || !admin_id.equals("admin")) {
+            return "redirect:/Admin/notAdminAccess";
+        }
 
-		return "/Admin/couponUpdate";
-	}
+        return "/Admin/couponRegister";
+    }
 
-	// 개별 쿠폰 정보 수정(POST)
-	@RequestMapping(value = "/couponUpdate", method = RequestMethod.POST)
-	public String couponUpdatePOST(couponVO cvo, Integer pageNum) throws Exception {
+    // 쿠폰 등록(POST)
+    @RequestMapping(value = "/couponRegister", method = RequestMethod.POST)
+    public String couponRegisterPOST(couponVO cvo) throws Exception {
+        Random random = new Random();
 
-		logger.info(" C: couponUpdatePOST() 호출 ");
-		
-		service.updateCoupon(cvo);
-		
-		logger.info(" 재료 재고 정보 수정 완료");
+        int coupon_id = random.nextInt(88888) + 11111;
+        cvo.setCoupon_id(coupon_id);
+        service.couponRegister(cvo);
 
-		return "redirect:/Admin/couponListAll?pageNum="+pageNum;
-	}
-	
-	// 개별 쿠폰 정보 삭제(GET)
-	@RequestMapping(value = "/couponDelete", method = RequestMethod.GET)
-	public String couponDeleteGET(HttpSession session, Integer coupon_id,Integer pageNum) throws Exception {
+        return "redirect:/Admin/registerSuccess";
+    }
 
-		String admin_id = (String) session.getAttribute("m_id");
+    // 개별 회원 쿠폰 발급(GET)
+    @RequestMapping(value = "/memberCouponRegister", method = RequestMethod.GET)
+    public String memberCouponRegisterGET(HttpSession session, Model model, Criteria cri) throws Exception {
+        String admin_id = (String) session.getAttribute("m_id");
 
-		if (admin_id == null || !admin_id.equals("admin")) {
-			return "redirect:/Admin/notAdminAccess";
-		}
+        if (admin_id == null || !admin_id.equals("admin")) {
+            return "redirect:/Admin/notAdminAccess";
+        }
 
-		logger.info(" couponDeleteGET() 호출 ");
+        model.addAttribute("couponListAll", service.couponListCri(cri));
 
-		service.deleteCoupon(coupon_id);	
+        return "/Admin/memberCouponRegister";
+    }
 
-		return "redirect:/Admin/couponListAll?pageNum="+pageNum;
-	}
-	
-	// 쿠폰 등록(GET)
-	@RequestMapping(value = "/couponRegister", method = RequestMethod.GET)
-	public String couponRegisterGET(HttpSession session) throws Exception {
+    // 개별 회원 쿠폰 발급(POST)
+    @RequestMapping(value = "/memberCouponRegister", method = RequestMethod.POST)
+    public String memberCouponRegisterPOST(memberVO mvo) throws Exception {
+        service.memberInsertCoupon(mvo);
+        return "redirect:/Admin/registerSuccess";
+    }
 
-		logger.info("igdtRegisterGET() 호출");
-
-		String admin_id = (String) session.getAttribute("m_id");
-
-		if (admin_id == null || !admin_id.equals("admin")) {
-			return "redirect:/Admin/notAdminAccess";
-		}
-
-		return "/Admin/couponRegister";
-	}
-
-	// 쿠폰 등록(POST)
-	@RequestMapping(value = "/couponRegister", method = RequestMethod.POST)
-	public String couponRegisterPOST(couponVO cvo) throws Exception {
-
-		logger.info("couponRegisterPOST() 호출");
-		
-		Random random = new Random();
-		
-		int coupon_id = random.nextInt(88888) + 11111;
-		
-		cvo.setCoupon_id(coupon_id);
-		service.couponRegister(cvo);
-
-		return "redirect:/Admin/registerSuccess";
-	}
-	
-	// 개별 회원 쿠폰 발급(GET)
-	@RequestMapping(value = "/memberCouponRegister", method = RequestMethod.GET)
-	public String memberCouponRegisterGET(HttpSession session, Model model, Criteria cri) throws Exception {
-
-		logger.info("memberCouponRegisterGET() 호출");
-
-		String admin_id = (String) session.getAttribute("m_id");
-
-		if (admin_id == null || !admin_id.equals("admin")) {
-			return "redirect:/Admin/notAdminAccess";
-		}
-		
-		model.addAttribute("couponListAll", service.couponListCri(cri));
-
-		return "/Admin/memberCouponRegister";
-	}
-	
-	// 개별 회원 쿠폰 발급(POST)
-	@RequestMapping(value = "/memberCouponRegister", method = RequestMethod.POST)
-	public String memberCouponRegisterPOST(memberVO mvo) throws Exception {
-
-		logger.info("memberCouponRegisterPOST() 호출");		
-		
-		service.memberInsertCoupon(mvo);
-		
-		logger.info(" 쿠폰 정보 등록 완료");
-		
-		return "redirect:/Admin/registerSuccess";
-
-	}
-	
 //////////////////////////////////////////////////////////// 판매 성향 정보 관련////////////////////////////////////////////////////////////////////
-	
-	// 주간 레시피 게시판 top 10 출력(GET)
-	@RequestMapping(value = "/RBoard_TopList", method = RequestMethod.GET)
-	public String RBoard_TopListGET(HttpSession session, Model model) throws Exception {
 
-		logger.info(" C: R_Board_TopListGET() 호출");
+    // 주간 레시피 게시판 top 10 출력(GET)
+    @RequestMapping(value = "/RBoard_TopList", method = RequestMethod.GET)
+    public String RBoard_TopListGET(HttpSession session, Model model) throws Exception {
+        String admin_id = (String) session.getAttribute("m_id");
 
-		String admin_id = (String) session.getAttribute("m_id");
+        if (admin_id == null || !admin_id.equals("admin")) {
+            return "redirect:/Admin/notAdminAccess";
+        }
 
-		if (admin_id == null || !admin_id.equals("admin")) {
-			return "redirect:/Admin/notAdminAccess";
-		}
+        // Criteria 객체 정보 저장(pageStart/pageSize)
+        model.addAttribute("RBoard_TopList", service.getR_Board_TopList());
 
-		// Criteria 객체 정보 저장(pageStart/pageSize)
-		model.addAttribute("RBoard_TopList", service.getR_Board_TopList());
+        return "/Admin/RBoard_TopList";
+    }
 
-		return "/Admin/RBoard_TopList";
-	}
-	
-	// 주간 샐러드 판매량 top 10 출력(GET)
-	@RequestMapping(value = "/Salad_TopList", method = RequestMethod.GET)
-	public String Salad_TopListGET(HttpSession session, Model model) throws Exception {
+    // 주간 샐러드 판매량 top 10 출력(GET)
+    @RequestMapping(value = "/Salad_TopList", method = RequestMethod.GET)
+    public String Salad_TopListGET(HttpSession session, Model model) throws Exception {
+        String admin_id = (String) session.getAttribute("m_id");
 
-		logger.info(" C: Salad_TopListGET() 호출");
+        if (admin_id == null || !admin_id.equals("admin")) {
+            return "redirect:/Admin/notAdminAccess";
+        }
 
-		String admin_id = (String) session.getAttribute("m_id");
+        // Criteria 객체 정보 저장(pageStart/pageSize)
+        model.addAttribute("Salad_TopList", service.getSalad_TopList());
 
-		if (admin_id == null || !admin_id.equals("admin")) {
-			return "redirect:/Admin/notAdminAccess";
-		}
-
-		// Criteria 객체 정보 저장(pageStart/pageSize)
-		model.addAttribute("Salad_TopList", service.getSalad_TopList());
-
-		return "/Admin/Salad_TopList";
-	}
+        return "/Admin/Salad_TopList";
+    }
 
 }
