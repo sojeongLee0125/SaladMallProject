@@ -1,68 +1,70 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper
-  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
- <mapper namespace="com.teamsalad.mapper.M_MainMapper">
+<mapper namespace="com.teamsalad.mapper.M_MainMapper">
 
-	<!--회원 정보 조회 -->
-	<select id="getMemberInfo" resultType="memberVO">
-		select * from tbl_member 
-		where m_id = #{m_id}
-	</select>
+    <!--회원 정보 조회 -->
+    <select id="getMemberInfo" resultType="memberVO">
+        select *
+        from tbl_member
+        where m_id = #{m_id}
+    </select>
 
-	<!-- 회원 개별 정보 수정  -->
-    	<update id="updateMember">
-		update tbl_member  
-		set 
-		m_pw = #{m_pw}, 
-		m_name = #{m_name}, 
-		m_email = #{m_email}, 
-		m_zip = #{m_zip}, 
-		m_addr1 = #{m_addr1}, 
-		m_addr2 = #{m_addr2}, 
-		m_phone = #{m_phone} 
-		where m_id = #{m_id}
-    	</update>
+    <!-- 회원 개별 정보 수정  -->
+    <update id="updateMember">
+        update tbl_member
+        set m_pw    = #{m_pw},
+            m_name  = #{m_name},
+            m_email = #{m_email},
+            m_zip   = #{m_zip},
+            m_addr1 = #{m_addr1},
+            m_addr2 = #{m_addr2},
+            m_phone = #{m_phone}
+        where m_id = #{m_id}
+    </update>
 
-	<!--회원 정보 삭제 -->
-	<delete id="deleteMember">
-		delete from tbl_member 
-		where m_id = #{m_id} and m_pw = #{m_pw}
-	</delete>
+    <!--회원 정보 삭제 -->
+    <delete id="deleteMember">
+        delete
+        from tbl_member
+        where m_id = #{m_id}
+          and m_pw = #{m_pw}
+    </delete>
 
-	<!--주문 목록 조회 -->
-	<select id="orderList" resultType="orderVO">
-		select * 
-		from tbl_order
-		where m_id = #{m_id}
-		order by order_date desc
-	</select>
+    <!--주문 목록 조회 -->
+    <select id="orderList" resultType="orderVO">
+        select *
+        from tbl_order
+        where m_id = #{m_id}
+        order by order_date desc
+    </select>
 
-	<!--특정 주문 조회 -->
-	<select id="orderInfo" resultType="orderVO">
-		select * 
-		from tbl_order 
-		where order_num = #{order_num}
-	</select>
+    <!--특정 주문 조회 -->
+    <select id="orderInfo" resultType="orderVO">
+        select *
+        from tbl_order
+        where order_num = #{order_num}
+    </select>
 
-	<!--주문 수정 -->
-    	<update id="orderUpdate">
-    		update tbl_order 
-    		set 
-    		order_receive_name = #{order_receive_name}, 
-    		order_receive_phone = #{order_receive_phone}, 
-    		order_receive_zip = #{order_receive_zip}, 
-    		order_receive_addr1 = #{order_receive_addr1}, 
-    		order_receive_addr2 = #{order_receive_addr2}, 
-    		order_amount = #{order_amount}
-    		where order_num = #{order_num}
-    	</update>
+    <!--주문 수정 -->
+    <update id="orderUpdate">
+        update tbl_order
+        set order_receive_name  = #{order_receive_name},
+            order_receive_phone = #{order_receive_phone},
+            order_receive_zip   = #{order_receive_zip},
+            order_receive_addr1 = #{order_receive_addr1},
+            order_receive_addr2 = #{order_receive_addr2},
+            order_amount        = #{order_amount}
+        where order_num = #{order_num}
+    </update>
 
-	<!--주문 삭제 -->
-	<delete id="orderDelete">
-		delete from tbl_order 
-		where order_num = #{order_num}
-	</delete>
+    <!--주문 삭제 -->
+    <delete id="orderDelete">
+        delete
+        from tbl_order
+        where order_num = #{order_num}
+    </delete>
 
 </mapper>

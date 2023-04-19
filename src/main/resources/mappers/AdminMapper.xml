@@ -1,293 +1,299 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper
-  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-  
- <mapper namespace="com.teamsalad.mapper.AdminMapper"> 
-	
-	<!-- 관리자 메인 페이지 출력 정보  -->
-	
-	<!-- 최근 주문 목록 7개 조회 -->
-	<select id="recentOList" resultType="orderVO">
-		select * from tbl_order
-		order by order_date desc limit 7
-	</select>
-	
-	<!-- 실시간 인기 레시피 게시판 랭킹 7위 조회  -->
-	<select id="popularRList" resultType="recipeBoardVO">
-		select * from recipe_board
-		order by rcp_b_like_count desc 
-		limit 7
-	</select>
-	
-	<!-- 회원관리 -->
-	
-	<!-- 회원 더미데이터 삽입  -->
-    	<insert id="insertMember">
-		insert into tbl_member (m_id,m_pw,m_name,m_email,m_zip,m_addr1,m_addr2,m_phone,m_grade,m_totalAmount,m_attendance,m_warning,m_coupon)
-		values(#{m_id},#{m_pw},#{m_name},#{m_email},#{m_zip},#{m_addr1}, 
-		#{m_addr2},#{m_phone},#{m_grade},#{m_totalAmount},#{m_attendance},#{m_warning},#{m_coupon})
-    	</insert> 
- 	
- 	<!-- 회원 전체 목록 조회 -->
-	<select id="mListAll" resultType="memberVO">
-		select * from tbl_member
-		where m_id != #{m_id}
-	</select>
-	
-	<!-- 회원 전체 목록 페이징 처리 list -->
-	<select id="mListCri" resultType="memberVO">
-	   select * 
-	   from tbl_member 
-	   limit #{skip},#{pageAmount}	  
-	</select>
-	
-	<!-- 회원 목록 전체 갯수 조회  -->
-	<select id="countMembers" resultType="int">
-	   select count(*) 
-	   from tbl_member 
-	</select>
-	
-	<!-- 회원 개별 정보 조회  -->
-    	<select id="mInfo" resultType="memberVO">
-    	select * from tbl_member
-    	where m_id = #{m_id}
-    	</select>
-    
-    	<!-- 회원 개별 정보 조회 (검색용키)  -->
-    	<select id="mInfoSeq" resultType="memberVO">
-    	select * from tbl_member
-    	where m_seq = #{m_seq}
-    	</select>
-    
-    	<!-- 회원 개별 정보 수정  -->
-    	<update id="mUpdate">
-    	update tbl_member 
-    	set 
-    	m_pw = #{m_pw}, 
-    	m_name = #{m_name}, 
-    	m_email = #{m_email}, 
-    	m_zip = #{m_zip}, 
-    	m_addr1 = #{m_addr1}, 
-    	m_addr2 = #{m_addr2}, 
-    	m_phone = #{m_phone}, 
-    	m_grade = #{m_grade}, 
-    	m_totalAmount = #{m_totalAmount}, 
-    	m_attendance = #{m_attendance}, 
-    	m_warning = #{m_warning},
-    	m_coupon = #{m_coupon}
-    	where m_id = #{m_id}
-    	</update>
-    
-    	<!-- 회원 개별 정보 삭제  -->
-    	<delete id="mDelete">
-    	delete from tbl_member 
-    	where m_id=#{m_id}
-    	</delete>
-    
-   	<!-- 주문 관리 -->
-    
-    	<!-- 주문 더미데이터 삽입  -->
-    	<insert id="insertOrder">
-		insert into tbl_order (order_num,m_id,rcp_num,coupon_id,order_pay_num,rcp_name,order_name,order_receive_name,order_receive_phone, 
-		order_receive_zip,order_receive_addr1,order_receive_addr2,order_type,order_amount,order_ship_price,order_total_price,order_status)
-		values (#{order_num},#{m_id},#{rcp_num},#{coupon_id},#{order_pay_num},#{rcp_name},#{order_name},#{order_receive_name},#{order_receive_phone}, 
-		#{order_receive_zip},#{order_receive_addr1},#{order_receive_addr2},#{order_type},#{order_amount},#{order_ship_price},#{order_total_price},#{order_status})
-    	</insert> 
-    
-    	<!-- 주문 전체 목록 조회 -->
-	<select id="oListAll" resultType="orderVO">
-		select * from tbl_order
-	</select>
-	
-	<!-- 주문 전체 목록 페이징 처리 list -->
-	<select id="oListCri" resultType="orderVO">
-	   select * 
-	   from tbl_order 
-	   limit #{skip},#{pageAmount}	  
-	</select>
-	
-	<!-- 주문 목록 전체 갯수 조회  -->
-	<select id="countOrders" resultType="int">
-	   select count(*) 
-	   from tbl_order 
-	</select>
-	
-	<!-- 개별 주문 정보 조회  -->
-    	<select id="oInfo" resultType="orderVO">
-    	  select * from tbl_order 
-    	  where order_num=#{order_num}
-    	</select>
-    
-    	<!-- 개별 주문 정보 수정  -->
-    	<update id="oUpdate">
-    	  update tbl_order
-    	  set 
-    	  m_id = #{m_id}, 
-    	  rcp_num = #{rcp_num},  
-    	  order_pay_num = #{order_pay_num}, 
-    	  rcp_name = #{rcp_name}, 
-    	  order_name = #{order_name}, 
-    	  order_receive_name = #{order_receive_name}, 
-    	  order_receive_phone = #{order_receive_phone}, 
-    	  order_receive_zip = #{order_receive_zip}, 
-    	  order_receive_addr1 = #{order_receive_addr1}, 
-    	  order_receive_addr2 = #{order_receive_addr2}, 
-    	  order_type = #{order_type}, 
-    	  order_amount = #{order_amount}, 
-    	  order_ship_price = #{order_ship_price}, 
-    	  order_total_price = #{order_total_price}, 
-    	  order_status = #{order_status}
-    	  where order_num = #{order_num}
-    	</update>
-    
-    	<!-- 개별 주문 정보 삭제  -->
-    	<delete id="oDelete">
-    	 delete from tbl_order 
-    	 where order_num=#{order_num}
-    	</delete>
-    
-    	<!-- 재료 관리 -->
-    
-    	<!-- 재료 더미데이터 삽입  -->
-    	<insert id="insertIngredient">
-		insert into salad_ingredient (igdt_num,igdt_category,igdt_name,igdt_price,igdt_main_img,igdt_country,igdt_info,igdt_count,igdt_tag,igdt_size)
-		values(#{igdt_num},#{igdt_category},#{igdt_name},#{igdt_price},#{igdt_main_img},#{igdt_country}, 
-		#{igdt_info},#{igdt_count},#{igdt_tag},#{igdt_size})
-    	</insert> 
-    
-	<!-- 재료 전체 목록 페이징 처리 list -->
-	<select id="igdtListCri" resultType="ingredientVO">
-	   select * 
-	   from salad_ingredient 
-	   limit #{skip},#{pageAmount}	  
-	</select>
-	
-	<!-- 재료 목록 전체 갯수 조회  -->
-	<select id="countIngredients" resultType="int">
-	   select count(*) 
-	   from salad_ingredient 
-	</select>
-	
-	<!-- 재료 정보 등록 -->
-	<insert id="igdtRegister">
-		insert into salad_ingredient (igdt_num,igdt_category,igdt_name,igdt_price,igdt_main_img, 
-		igdt_sub_img,igdt_country,igdt_info,igdt_count,igdt_tag,igdt_size) 
-		values (#{igdt_num},#{igdt_category},#{igdt_name},#{igdt_price},#{igdt_main_img}, 
-		#{igdt_sub_img},#{igdt_country},#{igdt_info},#{igdt_count},#{igdt_tag},#{igdt_size})
-	</insert>
-	
-	<!-- 개별 재료 정보 조회  -->
-   	<select id="igdtInfo" resultType="ingredientVO">
-    		select * 
-    		from salad_ingredient 
-    		where igdt_num=#{igdt_num}
-    	</select>
-	
-	<!-- 개별 재료 정보 수정  -->
-    	<update id="igdtUpdate">
-    	update salad_ingredient 
-    	set 
-    	igdt_category = #{igdt_category}, 
-    	igdt_name = #{igdt_name}, 
-    	igdt_price = #{igdt_price}, 
-    	igdt_main_img = #{igdt_main_img}, 
-    	igdt_sub_img = #{igdt_sub_img}, 
-    	igdt_country = #{igdt_country}, 
-    	igdt_info = #{igdt_info}, 
-    	igdt_count = #{igdt_count}, 
-    	igdt_tag = #{igdt_tag}, 
-    	igdt_size = #{igdt_size} 
-    	where igdt_num = #{igdt_num}
-    	</update>
-    
-    	<!-- 개별 재료 정보 삭제  -->
-    	<delete id="igdtDelete">
-    	delete from salad_ingredient 
-    	where igdt_num = #{igdt_num}
-    	</delete>
-    
-    
-    	<!-- 쿠폰 관리 -->
-    
- 	<!-- 쿠폰 전체 목록 페이징 처리 list -->
-	<select id="cListCri" resultType="couponVO">
-	   select * 
-	   from tbl_coupon
-	   limit #{skip},#{pageAmount}	  
-	</select>
-	
-	<!-- 쿠폰 발급 회원 list -->
-	<select id="couponMList" resultType="memberVO">
-	   select * 
-	   from tbl_member
-	   where m_coupon=#{coupon_id}   
-	</select>
-	
-	<!-- 쿠폰 발급 회원 목록 전체 갯수 조회  -->
-	<select id="countCouponMembers" resultType="int">
-	   select count(*) 
-	   from tbl_member
-	   where m_coupon=#{coupon_id} 
-	</select>
-	 
-	<!-- 쿠폰 목록 전체 갯수 조회  -->
-	<select id="countCoupons" resultType="int">
-	   select count(*) 
-	   from tbl_coupon 
-	</select>
-	
-	<!-- 쿠폰 정보 등록 -->
-	<insert id="couponRegister">
-		insert into tbl_coupon (coupon_id,coupon_name,coupon_disc_rate) 
-		values (#{coupon_id},#{coupon_name},#{coupon_disc_rate})
-	</insert>
-	
-	<!-- 쿠폰 재료 정보 조회  -->
-    	<select id="couponInfo" resultType="couponVO">
-    	select * 
-    	from tbl_coupon 
-    	where coupon_id=#{coupon_id}
-    	</select>
-	
-	<!-- 개별 쿠폰 정보 수정  -->
-    	<update id="couponUpdate">
-	update tbl_coupon 
-	set 
-	coupon_name = #{coupon_name}, 
-	coupon_disc_rate = #{coupon_disc_rate}
-	where coupon_id = #{coupon_id}
-    	</update>
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-    	<!-- 개별 쿠폰 정보 삭제  -->
-    	<delete id="couponDelete">
-    	delete from tbl_coupon 
-    	where coupon_id = #{coupon_id}
-    	</delete>
-    
-    	<!-- 개별 회원 쿠폰 발급  -->
-    	<update id="memberInsertCoupon">
-    	update tbl_member 
-    	set 
-    	m_coupon = #{m_coupon} 
-    	where m_id = #{m_id}
-    	</update>
-    
-    	<!-- 판매 성향 분석  -->
-    
-    	<!-- 주간 인기 레시피 게시판 list -->
-	<select id="rBoardTopList" resultType="recipeBoardVO">
-	   select * from recipe_board 
-	   where rcp_b_date BETWEEN DATE_ADD(NOW(),INTERVAL -1 WEEK ) AND NOW() 
-	   order by rcp_b_like_count desc 
-	   limit 10	  
-	</select>
-	
-	<!-- 주간 인기 판매 샐러드 list -->
-	<select id="saladTopList" resultType="recipeVO">
-	   select * from salad_recipe 
-	   order by rcp_week_count desc 
-	   limit 10	  
-	</select>
-	 
- </mapper>
+<mapper namespace="com.teamsalad.mapper.AdminMapper">
+
+    <!-- 관리자 메인 페이지 출력 정보  -->
+
+    <!-- 최근 주문 목록 7개 조회 -->
+    <select id="recentOList" resultType="orderVO">
+        select *
+        from tbl_order
+        order by order_date desc limit 7
+    </select>
+
+    <!-- 실시간 인기 레시피 게시판 랭킹 7위 조회  -->
+    <select id="popularRList" resultType="recipeBoardVO">
+        select *
+        from recipe_board
+        order by rcp_b_like_count desc limit 7
+    </select>
+
+    <!-- 회원관리 -->
+
+    <!-- 회원 더미데이터 삽입  -->
+    <insert id="insertMember">
+        insert into tbl_member (m_id, m_pw, m_name, m_email, m_zip, m_addr1, m_addr2, m_phone, m_grade, m_totalAmount,
+                                m_attendance, m_warning, m_coupon)
+        values (#{m_id}, #{m_pw}, #{m_name}, #{m_email}, #{m_zip}, #{m_addr1},
+                #{m_addr2}, #{m_phone}, #{m_grade}, #{m_totalAmount}, #{m_attendance}, #{m_warning}, #{m_coupon})
+    </insert>
+
+    <!-- 회원 전체 목록 조회 -->
+    <select id="mListAll" resultType="memberVO">
+        select *
+        from tbl_member
+        where m_id != #{m_id}
+    </select>
+
+    <!-- 회원 전체 목록 페이징 처리 list -->
+    <select id="mListCri" resultType="memberVO">
+        select *
+        from tbl_member limit #{skip},#{pageAmount}
+    </select>
+
+    <!-- 회원 목록 전체 갯수 조회  -->
+    <select id="countMembers" resultType="int">
+        select count(*)
+        from tbl_member
+    </select>
+
+    <!-- 회원 개별 정보 조회  -->
+    <select id="mInfo" resultType="memberVO">
+        select *
+        from tbl_member
+        where m_id = #{m_id}
+    </select>
+
+    <!-- 회원 개별 정보 조회 (검색용키)  -->
+    <select id="mInfoSeq" resultType="memberVO">
+        select *
+        from tbl_member
+        where m_seq = #{m_seq}
+    </select>
+
+    <!-- 회원 개별 정보 수정  -->
+    <update id="mUpdate">
+        update tbl_member
+        set m_pw          = #{m_pw},
+            m_name        = #{m_name},
+            m_email       = #{m_email},
+            m_zip         = #{m_zip},
+            m_addr1       = #{m_addr1},
+            m_addr2       = #{m_addr2},
+            m_phone       = #{m_phone},
+            m_grade       = #{m_grade},
+            m_totalAmount = #{m_totalAmount},
+            m_attendance  = #{m_attendance},
+            m_warning     = #{m_warning},
+            m_coupon      = #{m_coupon}
+        where m_id = #{m_id}
+    </update>
+
+    <!-- 회원 개별 정보 삭제  -->
+    <delete id="mDelete">
+        delete
+        from tbl_member
+        where m_id = #{m_id}
+    </delete>
+
+    <!-- 주문 관리 -->
+
+    <!-- 주문 더미데이터 삽입  -->
+    <insert id="insertOrder">
+        insert into tbl_order (order_num, m_id, rcp_num, coupon_id, order_pay_num, rcp_name, order_name,
+                               order_receive_name, order_receive_phone,
+                               order_receive_zip, order_receive_addr1, order_receive_addr2, order_type, order_amount,
+                               order_ship_price, order_total_price, order_status)
+        values (#{order_num}, #{m_id}, #{rcp_num}, #{coupon_id}, #{order_pay_num}, #{rcp_name}, #{order_name},
+                #{order_receive_name}, #{order_receive_phone},
+                #{order_receive_zip}, #{order_receive_addr1}, #{order_receive_addr2}, #{order_type}, #{order_amount},
+                #{order_ship_price}, #{order_total_price}, #{order_status})
+    </insert>
+
+    <!-- 주문 전체 목록 조회 -->
+    <select id="oListAll" resultType="orderVO">
+        select *
+        from tbl_order
+    </select>
+
+    <!-- 주문 전체 목록 페이징 처리 list -->
+    <select id="oListCri" resultType="orderVO">
+        select *
+        from tbl_order limit #{skip},#{pageAmount}
+    </select>
+
+    <!-- 주문 목록 전체 갯수 조회  -->
+    <select id="countOrders" resultType="int">
+        select count(*)
+        from tbl_order
+    </select>
+
+    <!-- 개별 주문 정보 조회  -->
+    <select id="oInfo" resultType="orderVO">
+        select *
+        from tbl_order
+        where order_num = #{order_num}
+    </select>
+
+    <!-- 개별 주문 정보 수정  -->
+    <update id="oUpdate">
+        update tbl_order
+        set m_id                = #{m_id},
+            rcp_num             = #{rcp_num},
+            order_pay_num       = #{order_pay_num},
+            rcp_name            = #{rcp_name},
+            order_name          = #{order_name},
+            order_receive_name  = #{order_receive_name},
+            order_receive_phone = #{order_receive_phone},
+            order_receive_zip   = #{order_receive_zip},
+            order_receive_addr1 = #{order_receive_addr1},
+            order_receive_addr2 = #{order_receive_addr2},
+            order_type          = #{order_type},
+            order_amount        = #{order_amount},
+            order_ship_price    = #{order_ship_price},
+            order_total_price   = #{order_total_price},
+            order_status        = #{order_status}
+        where order_num = #{order_num}
+    </update>
+
+    <!-- 개별 주문 정보 삭제  -->
+    <delete id="oDelete">
+        delete
+        from tbl_order
+        where order_num = #{order_num}
+    </delete>
+
+    <!-- 재료 관리 -->
+
+    <!-- 재료 더미데이터 삽입  -->
+    <insert id="insertIngredient">
+        insert into salad_ingredient (igdt_num, igdt_category, igdt_name, igdt_price, igdt_main_img, igdt_country,
+                                      igdt_info, igdt_count, igdt_tag, igdt_size)
+        values (#{igdt_num}, #{igdt_category}, #{igdt_name}, #{igdt_price}, #{igdt_main_img}, #{igdt_country},
+                #{igdt_info}, #{igdt_count}, #{igdt_tag}, #{igdt_size})
+    </insert>
+
+    <!-- 재료 전체 목록 페이징 처리 list -->
+    <select id="igdtListCri" resultType="ingredientVO">
+        select *
+        from salad_ingredient limit #{skip},#{pageAmount}
+    </select>
+
+    <!-- 재료 목록 전체 갯수 조회  -->
+    <select id="countIngredients" resultType="int">
+        select count(*)
+        from salad_ingredient
+    </select>
+
+    <!-- 재료 정보 등록 -->
+    <insert id="igdtRegister">
+        insert into salad_ingredient (igdt_num, igdt_category, igdt_name, igdt_price, igdt_main_img,
+                                      igdt_sub_img, igdt_country, igdt_info, igdt_count, igdt_tag, igdt_size)
+        values (#{igdt_num}, #{igdt_category}, #{igdt_name}, #{igdt_price}, #{igdt_main_img},
+                #{igdt_sub_img}, #{igdt_country}, #{igdt_info}, #{igdt_count}, #{igdt_tag}, #{igdt_size})
+    </insert>
+
+    <!-- 개별 재료 정보 조회  -->
+    <select id="igdtInfo" resultType="ingredientVO">
+        select *
+        from salad_ingredient
+        where igdt_num = #{igdt_num}
+    </select>
+
+    <!-- 개별 재료 정보 수정  -->
+    <update id="igdtUpdate">
+        update salad_ingredient
+        set igdt_category = #{igdt_category},
+            igdt_name     = #{igdt_name},
+            igdt_price    = #{igdt_price},
+            igdt_main_img = #{igdt_main_img},
+            igdt_sub_img  = #{igdt_sub_img},
+            igdt_country  = #{igdt_country},
+            igdt_info     = #{igdt_info},
+            igdt_count    = #{igdt_count},
+            igdt_tag      = #{igdt_tag},
+            igdt_size     = #{igdt_size}
+        where igdt_num = #{igdt_num}
+    </update>
+
+    <!-- 개별 재료 정보 삭제  -->
+    <delete id="igdtDelete">
+        delete
+        from salad_ingredient
+        where igdt_num = #{igdt_num}
+    </delete>
+
+    <!-- 쿠폰 관리 -->
+
+    <!-- 쿠폰 전체 목록 페이징 처리 list -->
+    <select id="cListCri" resultType="couponVO">
+        select *
+        from tbl_coupon limit #{skip},#{pageAmount}
+    </select>
+
+    <!-- 쿠폰 발급 회원 list -->
+    <select id="couponMList" resultType="memberVO">
+        select *
+        from tbl_member
+        where m_coupon = #{coupon_id}
+    </select>
+
+    <!-- 쿠폰 발급 회원 목록 전체 갯수 조회  -->
+    <select id="countCouponMembers" resultType="int">
+        select count(*)
+        from tbl_member
+        where m_coupon = #{coupon_id}
+    </select>
+
+    <!-- 쿠폰 목록 전체 갯수 조회  -->
+    <select id="countCoupons" resultType="int">
+        select count(*)
+        from tbl_coupon
+    </select>
+
+    <!-- 쿠폰 정보 등록 -->
+    <insert id="couponRegister">
+        insert into tbl_coupon (coupon_id, coupon_name, coupon_disc_rate)
+        values (#{coupon_id}, #{coupon_name}, #{coupon_disc_rate})
+    </insert>
+
+    <!-- 쿠폰 재료 정보 조회  -->
+    <select id="couponInfo" resultType="couponVO">
+        select *
+        from tbl_coupon
+        where coupon_id = #{coupon_id}
+    </select>
+
+    <!-- 개별 쿠폰 정보 수정  -->
+    <update id="couponUpdate">
+        update tbl_coupon
+        set coupon_name      = #{coupon_name},
+            coupon_disc_rate = #{coupon_disc_rate}
+        where coupon_id = #{coupon_id}
+    </update>
+
+    <!-- 개별 쿠폰 정보 삭제  -->
+    <delete id="couponDelete">
+        delete
+        from tbl_coupon
+        where coupon_id = #{coupon_id}
+    </delete>
+
+    <!-- 개별 회원 쿠폰 발급  -->
+    <update id="memberInsertCoupon">
+        update tbl_member
+        set m_coupon = #{m_coupon}
+        where m_id = #{m_id}
+    </update>
+
+    <!-- 판매 성향 분석  -->
+
+    <!-- 주간 인기 레시피 게시판 list -->
+    <select id="rBoardTopList" resultType="recipeBoardVO">
+        select *
+        from recipe_board
+        where rcp_b_date BETWEEN DATE_ADD(NOW(), INTERVAL -1 WEEK ) AND NOW()
+        order by rcp_b_like_count desc limit 10
+    </select>
+
+    <!-- 주간 인기 판매 샐러드 list -->
+    <select id="saladTopList" resultType="recipeVO">
+        select *
+        from salad_recipe
+        order by rcp_week_count desc limit 10
+    </select>
+
+</mapper>
